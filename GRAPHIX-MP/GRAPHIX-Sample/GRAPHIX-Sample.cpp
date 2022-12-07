@@ -1096,15 +1096,15 @@ int main(void)
         glUniform1i(tex0Address, 0);
 
         if (camMode == 1)
-            pCam.getPCamera(shaderProgram);
+            pCam.getPCamera(shaderProgram, viewMatrix);
         else if (camMode == 2)
             oCam.getOCamera(shaderProgram);
 
-        unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+        /*unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection_matrix));
 
         unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));*/
 
 
 
