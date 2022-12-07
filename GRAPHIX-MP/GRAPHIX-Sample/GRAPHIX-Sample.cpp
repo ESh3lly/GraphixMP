@@ -52,13 +52,36 @@ GLuint VAO_ship1, VBO_ship1, VAO_ship2, VBO_ship2, VAO_fighterShip, VBO_fighterS
 
 
 
+int lightIntensity = 1;
 PointLight pointlight = PointLight(subPos_x, subPos_y, subPos_z);
 DirectionLight directionlight = DirectionLight(5.0f, 12.0f, 0.0f);
 
 void keyInput(GLFWwindow* window);
 void mouseInput(GLFWwindow* window, double xPos, double yPos);
+void Key_Callback(GLFWwindow* window,
+    int key,
+    int scancode,
+    int action,
+    int mods) {
 
 
+    if (key == GLFW_KEY_F && action == GLFW_PRESS)
+    {
+        if (lightIntensity == 1) {
+            lightIntensity = 2;
+            pointlight.ambientStr = 0.5f;
+            printf("%d", lightIntensity);
+        }
+
+        else if (lightIntensity == 2) {
+            lightIntensity = 3;
+            pointlight.ambientStr = 2.0f;
+            printf("%d", lightIntensity);
+        }
+
+    }
+
+}
 
 std::vector<GLfloat> loadModel(std::string objectPath, std::vector<GLfloat> fullVertexData) {
 
@@ -308,7 +331,7 @@ int main(void)
 
     // Remove This if you want mouse back when application is running
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+    glfwSetKeyCallback(window, Key_Callback);
     std::fstream vertSrc("Shaders/sample.vert");
     std::stringstream vertBuff;
     vertBuff << vertSrc.rdbuf();
@@ -858,7 +881,7 @@ int main(void)
     float specPhong = 10.0f;
 
     PerspectiveCamera1 pCam(2);   //perspective camera
-    OrthoCamera oCam(-5.0f, 5.0f, -10.0f, 5.0f, -5.f, 5.0f);    //orthographic projection
+    OrthoCamera oCam(-50.0f, 50.0f, -50.0f, 50.0f, -50.f, 50.0f);    //orthographic projection
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))

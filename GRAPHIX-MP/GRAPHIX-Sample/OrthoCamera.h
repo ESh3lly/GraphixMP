@@ -24,8 +24,12 @@ public:
 
 	/*orthographic projection draw part*/
 	void getOCamera(GLuint shaderProg) {
+		
+		glm::vec3 OrthoCamPos = glm::vec3(0, 10.f, 0.f);
+		glm::vec3 OrthoUp = glm::vec3(0, 1.0f, -1.f);
+		glm::vec3 OrthoCamCenter = glm::vec3(0, 6.f, 1.f);
 
-		glm::mat4 view_matrix = glm::lookAt(cameraPos, cameraPos + CameraCenter, WorldUp);
+		glm::mat4 view_matrix = glm::lookAt(OrthoCamPos, OrthoCamPos + OrthoCamCenter, OrthoUp);
 
 		glm::mat4 projection_matrix = glm::ortho(leftPoint, rightPoint, botPoint, topPoint, zNear, zFar);
 
