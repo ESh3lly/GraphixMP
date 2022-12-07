@@ -35,6 +35,10 @@ glm::vec3 cameraPos = glm::vec3(0.f, 0.f, 3.f);
 glm::vec3 CameraCenter = glm::vec3(0.f, 0.f, -1.f);
 glm::vec3 WorldUp = glm::vec3(0.f, 1.f, 0.f);
 
+float subPos_z = 0.0f;
+float subPos_x = 0.0f;
+float subPos_y = -3.0f;
+
 #include "MyCamera.h"
 #include "PerspectiveCamera1.h"
 #include "PerspectiveCamera2.h"
@@ -43,9 +47,7 @@ glm::vec3 WorldUp = glm::vec3(0.f, 1.f, 0.f);
 #include "PointLight.h"
 #include "DirectionLight.h"
 
-float subPos_z = 0.0f;
-float subPos_x = 0.0f;
-float subPos_y = -3.0f;
+
 
 std::vector<GLfloat> fullVertexDataShip1, fullVertexDataShip2, fullVertexDataFighterShip, fullVertexDataRacingBoat, fullVertexDataWhaleShark, fullVertexDataSubmarine, fullVertexDataSquid;
 GLuint ship1Texture, ship2Texture, fighterShipTexture, racingBoatTexture, whaleSharkTexture, submarineTexture, squidTexture;
@@ -906,7 +908,7 @@ int main(void)
     PerspectiveCamera1 FPVCam(2);   //perspective camera
     PerspectiveCamera2 TPVCam(2);
     OrthoCamera oCam(-50.0f, 50.0f, -50.0f, 50.0f, -50.f, 50.0f);    //orthographic projection
-
+    glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + CameraCenter, WorldUp);
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -916,7 +918,7 @@ int main(void)
         directionlight.setDirectionLight(shaderProgram);
         currentTimePressed = glfwGetTime();
 
-        glm::vec3 cameraPos = glm::vec3(0, 0, subPos_z+10.0f);
+        
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -924,6 +926,8 @@ int main(void)
         pointlight.lightPosition = glm::vec3(subPos_x, subPos_y, subPos_z - 5.0f);
 
         keyInput(window);
+
+        glm::vec3 cameraPos = glm::vec3(0, 0, subPos_z + 10.0f);
 
         glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + CameraCenter, WorldUp);
         glDepthMask(GL_FALSE);
@@ -974,7 +978,7 @@ int main(void)
             if (pov == 1)
                 FPVCam.getPCamera(shaderProgram, viewMatrix);
             else if (pov == 2)
-                TPVCam.getPCamera2(shaderProgram);
+                TPVCam.getPCamera2(shaderProgram, viewMatrix);
         }
         else if (camMode == 2)
             oCam.getOCamera(shaderProgram);
@@ -1166,7 +1170,7 @@ void keyInput(GLFWwindow* window) {
 
 void mouseInput(GLFWwindow* window, double xPos, double yPos) {
 
-    if (camMode == 1) {
+    if ((camMode == 1)&&(pov==1)) {
         if (firstMouse) {
             lastX = xPos;
             lastY = yPos;

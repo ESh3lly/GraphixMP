@@ -14,9 +14,6 @@ public:
     /*perspective camera draw part*/
     void getPCamera(GLuint shaderProg, glm::mat4 viewMatrix) {
 
-        /*glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + CameraCenter, WorldUp);
-        glDepthMask(GL_FALSE);
-        glDepthFunc(GL_EQUAL);*/
 
         unsigned int cameraPosLoc = glGetUniformLocation(shaderProg, "cameraPos");
         glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
