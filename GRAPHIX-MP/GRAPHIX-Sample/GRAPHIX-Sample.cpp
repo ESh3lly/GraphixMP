@@ -35,6 +35,9 @@ glm::vec3 WorldUp = glm::vec3(0.f, 1.f, 0.f);
 void keyInput(GLFWwindow* window);
 void mouseInput(GLFWwindow* window, double xPos, double yPos);
 
+
+float subPos_z = 0.0f;
+void custKeybInput(GLFWwindow* window);
 int main(void)
 {
     GLFWwindow* window;
@@ -1035,8 +1038,10 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        custKeybInput(window);
         currentTimePressed = glfwGetTime();
 
+        glm::vec3 cameraPos = glm::vec3(0, 0, subPos_z+10.0f);
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -1116,65 +1121,65 @@ int main(void)
         glUniform1f(glGetUniformLocation(shaderProgram, "quad"), 0.04f);
 
         glUseProgram(shaderProgram); // Declare in loop once
-        glBindVertexArray(VAO); // Declare in loop once
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 8);
+        //glBindVertexArray(VAO); // Declare in loop once
+        //glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 8);
 
         //SHIP2
-        glBindVertexArray(VAO2);
+        /*glBindVertexArray(VAO2);
         glm::mat4 transformation_matrix2 = glm::mat4(1.0f);
         transformation_matrix2 = glm::translate(transformation_matrix2, glm::vec3(-1.0f, -1.0f, -1.0f));
         transformation_matrix2 = glm::scale(transformation_matrix2, glm::vec3(0.005f, 0.005f, 0.005f));
         transformation_matrix2 = glm::rotate(transformation_matrix2, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc2 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc2, 1, GL_FALSE, glm::value_ptr(transformation_matrix2));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexData2.size() / 8);
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData2.size() / 8);*/
 
         //FIGHTERSHIP
-        glBindVertexArray(VAO3);
+       /* glBindVertexArray(VAO3);
         glm::mat4 transformation_matrix3 = glm::mat4(1.0f);
         transformation_matrix3 = glm::translate(transformation_matrix3, glm::vec3(2.0f, 0.0f, 0.0f));
         transformation_matrix3 = glm::scale(transformation_matrix3, glm::vec3(0.003f, 0.003f, 0.003f));
         transformation_matrix3 = glm::rotate(transformation_matrix3, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc3 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc3, 1, GL_FALSE, glm::value_ptr(transformation_matrix3));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexData3.size() / 8);
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData3.size() / 8);*/
 
         //RACINGBOAT
-        glBindVertexArray(VAO4);
+        /*glBindVertexArray(VAO4);
         glm::mat4 transformation_matrix4 = glm::mat4(1.0f);
         transformation_matrix4 = glm::translate(transformation_matrix4, glm::vec3(-2.5f, -2.5f, 0.0f));
         transformation_matrix4 = glm::scale(transformation_matrix4, glm::vec3(0.01f, 0.01f, 0.01f));
         transformation_matrix4 = glm::rotate(transformation_matrix4, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc4 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc4, 1, GL_FALSE, glm::value_ptr(transformation_matrix4));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexData4.size() / 8);
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData4.size() / 8);*/
 
         //SQUID
-        glBindVertexArray(VAO5);
+       /* glBindVertexArray(VAO5);
         glm::mat4 transformation_matrix5 = glm::mat4(1.0f);
         transformation_matrix5 = glm::translate(transformation_matrix5, glm::vec3(-4.5f, 4.0f, 0.0f));
         transformation_matrix5 = glm::scale(transformation_matrix5, glm::vec3(0.1f, 0.1f, 0.1f));
         transformation_matrix5 = glm::rotate(transformation_matrix5, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc5 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc5, 1, GL_FALSE, glm::value_ptr(transformation_matrix5));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexData5.size() / 8);
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData5.size() / 8);*/
 
         //WHALESHARK
-        glBindVertexArray(VAO6);
+        /*glBindVertexArray(VAO6);
         glm::mat4 transformation_matrix6 = glm::mat4(1.0f);
         transformation_matrix6 = glm::translate(transformation_matrix6, glm::vec3(2.5f, -3.5f, 0.0f));
         transformation_matrix6 = glm::scale(transformation_matrix6, glm::vec3(0.008f, 0.008f, 0.008f));
         transformation_matrix6 = glm::rotate(transformation_matrix6, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc6 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc6, 1, GL_FALSE, glm::value_ptr(transformation_matrix6));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexData6.size() / 8);
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData6.size() / 8);*/
 
         //SUBMARINE
         glBindVertexArray(VAO7);
         glm::mat4 transformation_matrix7 = glm::mat4(1.0f);
-        transformation_matrix7 = glm::translate(transformation_matrix7, glm::vec3(-4.5f, -2.5f, 0.0f));
-        transformation_matrix7 = glm::scale(transformation_matrix7, glm::vec3(0.0008f, 0.0008f, 0.0008f));
-        transformation_matrix7 = glm::rotate(transformation_matrix7, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
+        transformation_matrix7 = glm::translate(transformation_matrix7, glm::vec3(0.0f, -3.0f, subPos_z));
+        transformation_matrix7 = glm::scale(transformation_matrix7, glm::vec3(0.0007f, 0.0007f, 0.0007f));
+        transformation_matrix7 = glm::rotate(transformation_matrix7, glm::radians(90.0f), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc7 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc7, 1, GL_FALSE, glm::value_ptr(transformation_matrix7));
         glDrawArrays(GL_TRIANGLES, 0, fullVertexData7.size() / 8);
@@ -1192,6 +1197,15 @@ int main(void)
     glfwTerminate();
     return 0;
 }
+void custKeybInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        subPos_z -= 0.1f;
+    
+    }
 
 void keyInput(GLFWwindow* window) {
 
