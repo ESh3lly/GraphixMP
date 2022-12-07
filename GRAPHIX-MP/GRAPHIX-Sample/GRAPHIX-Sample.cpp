@@ -28,9 +28,15 @@ bool firstMouse = true;
 float lastX = 800.0f / 2.0;
 float lastY = 600.0F / 2.0;
 
+int camMode = 1;
+
 glm::vec3 cameraPos = glm::vec3(0.f, 0.f, 3.f);
 glm::vec3 CameraCenter = glm::vec3(0.f, 0.f, -1.f);
 glm::vec3 WorldUp = glm::vec3(0.f, 1.f, 0.f);
+
+#include "MyCamera.h"
+#include "PerspectiveCamera1.h"
+#include "OrthoCamera.h"
 
 float subPos_z = 0.0f;
 void keyInput(GLFWwindow* window);
@@ -1030,6 +1036,9 @@ int main(void)
     float specStr = 1.0f;
     float specPhong = 10.0f;
 
+    PerspectiveCamera1 pCam(2);   //perspective camera
+    OrthoCamera oCam(-5.0f, 5.0f, -10.0f, 5.0f, -5.f, 5.0f);    //orthographic projection
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -1083,11 +1092,16 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
 
-        unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+        if (camMode == 1)
+            pCam.getPCamera(shaderProgram);
+        else if (camMode == 2)
+            oCam.getOCamera(shaderProgram);
+
+       /* unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection_matrix));
 
         unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));*/
 
 
 
@@ -1216,6 +1230,12 @@ void keyInput(GLFWwindow* window) {
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         cameraPos += glm::normalize(glm::cross(CameraCenter, WorldUp)) * cameraSpeed;
+    }
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+        camMode=2;
+    }
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+        camMode=1;
     }
 
 }
