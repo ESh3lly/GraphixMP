@@ -79,8 +79,14 @@ void Key_Callback(GLFWwindow* window,
             printf("%d", lightIntensity);
         }
 
-    }
+        else if (lightIntensity == 3) {
+            lightIntensity = 1;
+            pointlight.ambientStr = 4.0f;
+            printf("%d", lightIntensity);
 
+        }
+
+    }
 }
 
 std::vector<GLfloat> loadModel(std::string objectPath, std::vector<GLfloat> fullVertexData) {
