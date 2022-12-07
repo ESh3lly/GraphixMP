@@ -13,6 +13,28 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+
+bool firstTimePressed = true;
+double currentTimePressed, lastTimePressed;
+
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
+float yaw = -90.0f;
+float pitch = 0.0f;
+
+bool firstMouse = true;
+float lastX = 800.0f / 2.0;
+float lastY = 600.0F / 2.0;
+
+glm::vec3 cameraPos = glm::vec3(0.f, 0.f, 3.f);
+glm::vec3 CameraCenter = glm::vec3(0.f, 0.f, -1.f);
+glm::vec3 WorldUp = glm::vec3(0.f, 1.f, 0.f);
+
+void keyInput(GLFWwindow* window);
+void mouseInput(GLFWwindow* window, double xPos, double yPos);
+
 int main(void)
 {
     GLFWwindow* window;
@@ -39,6 +61,9 @@ int main(void)
 
     glViewport(0, 0, 600, 600);
     //glViewport(320, 0, 320, 480);
+
+    glfwSetCursorPosCallback(window, mouseInput);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     std::fstream vertSrc("Shaders/sample.vert");
     std::stringstream vertBuff;
@@ -94,16 +119,7 @@ int main(void)
 
     glLinkProgram(skybox_shaderProgram);
 
-    /*
-  7--------6
- /|       /|
-4--------5 |
-| |      | |
-| 3------|-2
-|/       |/
-0--------1
-*/
-//Vertices for the cube
+
     float skyboxVertices[]{
         -1.f, -1.f, 1.f, //0
         1.f, -1.f, 1.f,  //1
@@ -134,7 +150,7 @@ int main(void)
 
         3,7,6,
         6,2,3
-    };
+    }; 
 
     unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
     glGenVertexArrays(1, &skyboxVAO);
@@ -150,12 +166,12 @@ int main(void)
     glEnableVertexAttribArray(0);
 
     std::string facesSkybox[]{
-        "Skybox/rainbow_rt.png",
-        "Skybox/rainbow_lf.png",
-        "Skybox/rainbow_up.png",
-        "Skybox/rainbow_dn.png",
-        "Skybox/rainbow_ft.png",
-        "Skybox/rainbow_bk.png"
+        "Skybox/OceanRight.png",
+        "Skybox/OceanLeft.png",
+        "Skybox/OceanUp.png",
+        "Skybox/OceanDown.png",
+        "Skybox/OceanForward.png",
+        "Skybox/OceanBack.png"
     };
 
     unsigned int skyboxTex;
@@ -1019,15 +1035,15 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        currentTimePressed = glfwGetTime();
 
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
-        glm::vec3 cameraPos = glm::vec3(0, 0, 10.f);
-        glm::mat4 cameraPosMatrix = glm::translate(glm::mat4(1.0f), cameraPos * -1.f);
+        keyInput(window);
 
-        glm::vec3 WorldUp = glm::normalize(glm::vec3(0, 1.f, 0));
-        glm::vec3 CameraCenter = glm::vec3(0, 0.0f, 0);
-
-        glm::mat4 viewMatrix = glm::lookAt(cameraPos, CameraCenter, WorldUp);
+        glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + CameraCenter, WorldUp);
         glDepthMask(GL_FALSE);
         glDepthFunc(GL_EQUAL);
 
@@ -1175,4 +1191,58 @@ int main(void)
 
     glfwTerminate();
     return 0;
+}
+
+void keyInput(GLFWwindow* window) {
+
+    float cameraSpeed = 2.5 * deltaTime;
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        cameraPos += cameraSpeed * CameraCenter;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        cameraPos -= cameraSpeed * CameraCenter;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        cameraPos -= glm::normalize(glm::cross(CameraCenter, WorldUp)) * cameraSpeed;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        cameraPos += glm::normalize(glm::cross(CameraCenter, WorldUp)) * cameraSpeed;
+    }
+
+}
+
+void mouseInput(GLFWwindow* window, double xPos, double yPos) {
+
+    if (firstMouse) {
+        lastX = xPos;
+        lastY = yPos;
+        firstMouse = false;
+    }
+
+    float xoffset = xPos - lastX;
+    float yoffset = lastY - yPos;
+    lastX = xPos;
+    lastY = yPos;
+
+    float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 front = glm::vec3(0.f, 0.f, 0.f);
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    CameraCenter = glm::normalize(front);
 }
