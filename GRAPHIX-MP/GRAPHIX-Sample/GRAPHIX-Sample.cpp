@@ -38,6 +38,9 @@ glm::vec3 WorldUp = glm::vec3(0.f, 1.f, 0.f);
 #include "PerspectiveCamera1.h"
 #include "OrthoCamera.h"
 
+#include "PointLight.h"
+#include "DirectionLight.h"
+
 float subPos_z = 0.0f;
 void keyInput(GLFWwindow* window);
 void mouseInput(GLFWwindow* window, double xPos, double yPos);
