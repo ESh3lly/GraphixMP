@@ -15,6 +15,7 @@ public:
 	float topPoint;
 	float zNear;
 	float zFar;
+	char wala;
 
 	/*Parent class for PErspective Camera and Orthographic Projection*/
 	MyCamera() {
