@@ -1045,7 +1045,7 @@ int main(void)
     float specPhong = 10.0f;
 
     PerspectiveCamera1 pCam(2);   //perspective camera
-    OrthoCamera oCam(-5.0f, 5.0f, -10.0f, 5.0f, -5.f, 5.0f);    //orthographic projection
+    OrthoCamera oCam(-50.0f, 50.0f, -50.0f, 50.0f, -50.f, 50.0f);    //orthographic projection
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
