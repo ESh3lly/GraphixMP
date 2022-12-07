@@ -44,12 +44,40 @@ glm::vec3 WorldUp = glm::vec3(0.f, 1.f, 0.f);
 float subPos_z = 0.0f;
 float subPos_x = 0.0f;
 float subPos_y = -3.0f;
-
+int lightIntensity = 1;
 PointLight pointlight = PointLight(subPos_x, subPos_y, subPos_z);
 DirectionLight directionlight = DirectionLight(5.0f, 12.0f, 0.0f);
 void keyInput(GLFWwindow* window);
 void mouseInput(GLFWwindow* window, double xPos, double yPos);
+void Key_Callback(GLFWwindow* window,
+    int key,
+    int scancode,
+    int action,
+    int mods) {
 
+    
+    if (key == GLFW_KEY_F && action == GLFW_PRESS)
+    {
+        if (lightIntensity == 1) {
+            lightIntensity = 2;
+            pointlight.ambientStr = 0.5f;
+            printf("%d", lightIntensity);
+        }
+
+        else if (lightIntensity == 2) {
+            lightIntensity = 3;
+            pointlight.ambientStr = 2.0f;
+            printf("%d", lightIntensity);
+        }
+
+        else if (lightIntensity == 3) {
+            lightIntensity = 1;
+            pointlight.ambientStr = 4.0f;
+            printf("%d", lightIntensity);
+        }
+
+    }
+}
 int main(void)
 {
     GLFWwindow* window;
@@ -79,7 +107,7 @@ int main(void)
 
     glfwSetCursorPosCallback(window, mouseInput);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+    glfwSetKeyCallback(window, Key_Callback);
     std::fstream vertSrc("Shaders/sample.vert");
     std::stringstream vertBuff;
     vertBuff << vertSrc.rdbuf();
