@@ -5,6 +5,7 @@ uniform vec3 lightColor;
 
 uniform vec4 color;
 uniform sampler2D tex0;
+
 out vec4 FragColor; //Color of the Pixel
 in vec2 texCoord;
 in vec3 normCoord;
@@ -65,6 +66,7 @@ vec4 pointlight(){
 
      return vec4(diffuse + ambientCol + specCol, 1.0f) * texture(tex0, texCoord);
 }
+
 //Implement separate method for direction light to feed to FragColor
 vec4 directionlight(){
    vec3 normal = normalize(normCoord);
