@@ -1234,6 +1234,7 @@ void keyInput(GLFWwindow* window) {
 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         cameraPos -= cameraSpeed * CameraCenter;
+        subPos_z += 0.1f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
