@@ -13,105 +13,32 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-
-float x = 0.0f, y = 0.0f, z = 0.0f;
-
-float scale_x = 5.f, scale_y = 5.f, scale_z = 5.f;
-
-float rot_x = 1, rot_y = 0, rot_z = 0;
-
-float theta = 0.0f;
-
-
-void Key_Callback(GLFWwindow* window,
-    int key,
-    int scancode,
-    int action,
-    int mods
-) {
-    // Movement && Scaling
-
-    switch (key) {
-    case GLFW_KEY_W:
-        y += 0.2f;
-        break;
-    case GLFW_KEY_A:
-        x -= 0.2f;
-        break;
-    case GLFW_KEY_S:
-        y -= 0.2f;
-        break;
-    case GLFW_KEY_D:
-        x += 0.2f;
-        break;
-    case GLFW_KEY_Q:
-        scale_x += 0.5f;
-        scale_y += 0.5f;
-        scale_z += 0.5f;
-        break;
-    case GLFW_KEY_E:
-        scale_x -= 0.5f;
-        scale_y -= 0.5f;
-        scale_z -= 0.5f;
-        break;
-    }
-
-    // Rotation
-    switch (key) {
-    case GLFW_KEY_RIGHT:
-        theta += 7.0f;
-        rot_y = 1;
-        rot_x = 0;
-        break;
-
-    case GLFW_KEY_LEFT:
-        theta -= 7.0f;
-        rot_y = 1;
-        rot_x = 0;
-        break;
-
-    case GLFW_KEY_UP:
-        theta -= 7.0f;
-        rot_y = 0;
-        rot_x = 1;
-        break;
-
-    case GLFW_KEY_DOWN:
-        theta += 7.0f;
-        rot_y = 0;
-        rot_x = 1;
-        break;
-
-    }
-
-}
-
 int main(void)
 {
     GLFWwindow* window;
 
+    /* Initialize the library */
     if (!glfwInit())
         return -1;
 
-    float screenWidth = 800.0f;
-    float screenHeight = 800.0f;
+    float screenWidth = 600.0f;
+    float screenHeight = 600.0f;
 
-    window = glfwCreateWindow(screenWidth, screenHeight, "Jerickson Lee", NULL, NULL);
+    /* Create a windowed mode window and its OpenGL context */
+    window = glfwCreateWindow(screenWidth, screenHeight, "Aguilar, Earl Angelo | Aquino, Karl Matthew | Lee, Jerickson", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
         return -1;
     }
 
-    glfwSetKeyCallback(window, Key_Callback);
-
+    /* Make the window's context current */
     glfwMakeContextCurrent(window);
-
+    //Initialize GLAD
     gladLoadGL();
 
-    stbi_set_flip_vertically_on_load(true);
-
-    glViewport(0, 0, screenWidth, screenHeight);
+    glViewport(0, 0, 600, 600);
+    //glViewport(320, 0, 320, 480);
 
     std::fstream vertSrc("Shaders/sample.vert");
     std::stringstream vertBuff;
@@ -139,7 +66,7 @@ int main(void)
 
     glLinkProgram(shaderProgram);
 
-    /////////////////
+    //**********************************************************************************************
 
     std::fstream skybox_vertSrc("Shaders/skybox.vert");
     std::stringstream skybox_vertBuff;
@@ -167,6 +94,16 @@ int main(void)
 
     glLinkProgram(skybox_shaderProgram);
 
+    /*
+  7--------6
+ /|       /|
+4--------5 |
+| |      | |
+| 3------|-2
+|/       |/
+0--------1
+*/
+//Vertices for the cube
     float skyboxVertices[]{
         -1.f, -1.f, 1.f, //0
         1.f, -1.f, 1.f,  //1
@@ -200,15 +137,14 @@ int main(void)
     };
 
     unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
-
     glGenVertexArrays(1, &skyboxVAO);
     glGenBuffers(1, &skyboxVBO);
     glGenBuffers(1, &skyboxEBO);
     glBindVertexArray(skyboxVAO);
     glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GL_INT) * 36, &skyboxIndices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
@@ -219,57 +155,53 @@ int main(void)
         "Skybox/rainbow_up.png",
         "Skybox/rainbow_dn.png",
         "Skybox/rainbow_ft.png",
-        "Skybox/rainbow_bk.png",
+        "Skybox/rainbow_bk.png"
     };
 
     unsigned int skyboxTex;
-
     glGenTextures(1, &skyboxTex);
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
-
+    //Prevents pixelating
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+    //Prevents Tiling
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    for (unsigned int i = 0; i < 6; i++) {
-
+    for (unsigned int i = 0; i < 6; i++)
+    {
         int w, h, skyCChannel;
-
         stbi_set_flip_vertically_on_load(false);
 
-        unsigned char* data = stbi_load(facesSkybox[i].c_str(), &w, &h, &skyCChannel, 0);
-
-        if (data) {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        unsigned char* data = stbi_load(facesSkybox[i].c_str(),
+            &w,
+            &h,
+            &skyCChannel,
+            0);
+        if (data)
+        {
+            glTexImage2D(
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0,
+                GL_RGB,
+                w,
+                h,
+                0,
+                GL_RGB,
+                GL_UNSIGNED_BYTE,
+                data
+            );
         }
-
-        stbi_image_free(data);
     }
-
-
     stbi_set_flip_vertically_on_load(true);
 
-
-    std::string path = "3D/plane.obj";
+    std::string path = "3D/Durham Boat V1/ship1.obj";
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
     std::string warning, error;
 
     tinyobj::attrib_t attributes;
-
-    GLfloat UV[]{
-        0.f, 1.f,
-        0.f, 0.f,
-        1.f, 1.f,
-        1.f, 0.f,
-        1.f, 1.f,
-        1.f, 0.f,
-        0.f, 1.f,
-        0.f, 0.f
-    };
 
     bool success = tinyobj::LoadObj(
         &attributes,
@@ -280,8 +212,24 @@ int main(void)
         path.c_str()
     );
 
-    int img_width, img_height, color_channels;
+    std::vector<GLuint> mesh_indices1;
+    for (int i = 0; i < shapes[0].mesh.indices.size(); i++) {
+        mesh_indices1.push_back(shapes[0].mesh.indices[i].vertex_index);
+    }
 
+    GLfloat UV[]{
+    0.f, 1.f,
+    0.f, 0.f,
+    1.f, 1.f,
+    1.f, 0.f,
+    1.f, 1.f,
+    1.f, 0.f,
+    0.f, 1.f,
+    0.f, 0.f
+    };
+
+    //stbi_set_flip_vertically_on_load(true);
+    int img_width, img_height, color_channels;
     unsigned char* tex_bytes = stbi_load("3D/brickwall.jpg", &img_width, &img_height, &color_channels, 0);
 
     GLuint texture;
@@ -291,10 +239,9 @@ int main(void)
 
     glTexImage2D(
         GL_TEXTURE_2D,
-        0, // Texture 0
-        GL_RGB, // GL_RGB = jpegs /pngs w/o a GL_RGBA = png / images w/ a
-        img_width,
-        img_height,
+        0,
+        GL_RGB, //GL_RGB = for jpegs/png w/o alpha; GL_RGBA = png/images with alpha
+        img_width, img_height,
         0,
         GL_RGB,
         GL_UNSIGNED_BYTE,
@@ -304,234 +251,748 @@ int main(void)
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(tex_bytes);
 
-    /////////////
-
-    unsigned char* norm_bytes = stbi_load("3D/brickwall_normal.jpg", &img_width, &img_height, &color_channels, 0);
-
-    GLuint norm_tex;
-    glGenTextures(1, &norm_tex);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, norm_tex);
-
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0, // Texture 0
-        GL_RGB, // GL_RGB = jpegs /pngs w/o a GL_RGBA = png / images w/ a
-        img_width,
-        img_height,
-        0,
-        GL_RGB,
-        GL_UNSIGNED_BYTE,
-        norm_bytes
-    );
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(norm_bytes);
-
-
-    glEnable(GL_DEPTH_TEST);
-
-
-    std::vector<GLuint> mesh_indices;
-    for (int i = 0; i < shapes[0].mesh.indices.size(); i++) {
-        mesh_indices.push_back(
-            shapes[0].mesh.indices[i].vertex_index
-        );
-    }
-
-    std::vector<glm::vec3> tangents;
-    std::vector<glm::vec3> bitangents;
-
-    for (int i = 0; i < shapes[0].mesh.indices.size(); i += 3) {
-        tinyobj::index_t vData1 = shapes[0].mesh.indices[i];
-        tinyobj::index_t vData2 = shapes[0].mesh.indices[i + 1];
-        tinyobj::index_t vData3 = shapes[0].mesh.indices[i + 2];
-
-        glm::vec3 v1 = glm::vec3(
-            attributes.vertices[vData1.vertex_index * 3],
-            attributes.vertices[vData1.vertex_index * 3 + 1],
-            attributes.vertices[vData1.vertex_index * 3 + 2]
-        );
-
-        glm::vec3 v2 = glm::vec3(
-            attributes.vertices[vData2.vertex_index * 3],
-            attributes.vertices[vData2.vertex_index * 3 + 1],
-            attributes.vertices[vData2.vertex_index * 3 + 2]
-        );
-
-        glm::vec3 v3 = glm::vec3(
-            attributes.vertices[vData3.vertex_index * 3],
-            attributes.vertices[vData3.vertex_index * 3 + 1],
-            attributes.vertices[vData3.vertex_index * 3 + 2]
-        );
-
-        glm::vec2 uv1 = glm::vec2(
-            attributes.texcoords[vData1.texcoord_index * 2],
-            attributes.texcoords[vData1.texcoord_index * 2 + 1]
-        );
-
-        glm::vec2 uv2 = glm::vec2(
-            attributes.texcoords[vData2.texcoord_index * 2],
-            attributes.texcoords[vData2.texcoord_index * 2 + 1]
-        );
-
-        glm::vec2 uv3 = glm::vec2(
-            attributes.texcoords[vData3.texcoord_index * 2],
-            attributes.texcoords[vData3.texcoord_index * 2 + 1]
-        );
-
-        glm::vec3 deltaPos1 = v2 - v1;
-        glm::vec3 deltaPos2 = v3 - v1;
-
-        glm::vec2 deltaUV1 = uv2 - uv1;
-        glm::vec2 deltaUV2 = uv3 - uv1;
-
-        float r = 1.f / ((deltaUV1.x * deltaUV2.y) - (deltaUV1.y * deltaUV2.x));
-
-        glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-        glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
-
-        tangents.push_back(tangent);
-        tangents.push_back(tangent);
-        tangents.push_back(tangent);
-
-        bitangents.push_back(bitangent);
-        bitangents.push_back(bitangent);
-        bitangents.push_back(bitangent);
-
-    }
-
-
-
     std::vector<GLfloat> fullVertexData;
     for (int i = 0; i < shapes[0].mesh.indices.size(); i++) {
         tinyobj::index_t vData = shapes[0].mesh.indices[i];
 
         int vertexIndex = vData.vertex_index * 3;
         int uvIndex = vData.texcoord_index * 2;
-        int normalIndex = vData.normal_index * 3;
-
-        // X
+        int normIndex = vData.normal_index * 3;
+        //X
         fullVertexData.push_back(
             attributes.vertices[vertexIndex]
-        );
 
-        // Y
+        );
+        //Y
         fullVertexData.push_back(
             attributes.vertices[vertexIndex + 1]
-        );
 
-        // Z
+        );
+        //Z
         fullVertexData.push_back(
             attributes.vertices[vertexIndex + 2]
-        );
 
-        // X
-        fullVertexData.push_back(
-            attributes.normals[normalIndex]
         );
+        //Normals
+        fullVertexData.push_back(attributes.normals[normIndex]);
+        fullVertexData.push_back(attributes.normals[normIndex + 1]);
+        fullVertexData.push_back(attributes.normals[normIndex + 2]);
 
-        // Y
-        fullVertexData.push_back(
-            attributes.normals[normalIndex + 1]
-        );
-
-        // Z
-        fullVertexData.push_back(
-            attributes.normals[normalIndex + 2]
-        );
-
-        // U
+        //U
         fullVertexData.push_back(
             attributes.texcoords[uvIndex]
-        );
 
-        // V
+        );
+        //V
         fullVertexData.push_back(
             attributes.texcoords[uvIndex + 1]
-        );
 
-        fullVertexData.push_back(
-            tangents[i].x
-        );
-
-        fullVertexData.push_back(
-            tangents[i].y
-        );
-
-        fullVertexData.push_back(
-            tangents[i].z
-        );
-
-        fullVertexData.push_back(
-            bitangents[i].x
-        );
-
-        fullVertexData.push_back(
-            bitangents[i].y
-        );
-
-        fullVertexData.push_back(
-            bitangents[i].z
         );
 
     }
 
-    GLuint VAO, VBO;
+    GLfloat vertices[]{
+        0.f, 0.5f, 0.f, //0
+        -0.5f, -0.5f,0.f, //1
+        0.5f, -0.5f, 0.f //2
+    };
+
+    //EBO indices --- EBO reduces redundant indices
+    GLuint indices[]{
+        0,1,2 //Triangle 1
+    };
+    //Init VAO and VBO id vars
+    GLuint VAO, VBO, VAO2, VBO2, VAO3, VBO3, VAO4, VBO4, VAO5, VBO5, VAO6, VBO6, VAO7, VBO7; //EBO, VBO_UV;
+    //Generate and Assign ID to VAO
     glGenVertexArrays(1, &VAO);
+    //Generate and Assign ID to VBO
     glGenBuffers(1, &VBO);
 
+
     glBindVertexArray(VAO);
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT) * fullVertexData.size(), fullVertexData.data(), GL_STATIC_DRAW);
+    //LOADING MESH
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(GL_FLOAT) * fullVertexData.size(), //Indices ng array
+        fullVertexData.data(), //array itself
+        GL_STATIC_DRAW
+    );
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GL_FLOAT), (void*)0);
+    glVertexAttribPointer(0, // Position
+        3, // 3 properties: X,Y,Z
+        GL_FLOAT,
+        GL_FALSE,
+        //XYZUV
+        8 * sizeof(GL_FLOAT),
+        (void*)0);
 
     GLintptr normPtr = 3 * sizeof(GL_FLOAT);
-
-    glVertexAttribPointer(
-        1,
-        3,
+    glVertexAttribPointer(1,
+        3,//3 props
         GL_FLOAT,
         GL_FALSE,
-        14 * sizeof(GL_FLOAT),
+        8 * sizeof(GL_FLOAT),//XYZUV
         (void*)normPtr
     );
-
     GLintptr uvPtr = 6 * sizeof(GL_FLOAT);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(GL_FLOAT), (void*)uvPtr);
-
-    GLintptr tangentPtr = 8 * sizeof(GL_FLOAT);
-    GLintptr bitangentPtr = 11 * sizeof(GL_FLOAT);
-
-    glVertexAttribPointer(
-        3,
-        3,
+    glVertexAttribPointer(2,
+        2,//UV
         GL_FLOAT,
         GL_FALSE,
-        14 * sizeof(GL_FLOAT),
-        (void*)tangentPtr
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)uvPtr
     );
 
-    glVertexAttribPointer(
-        4,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        14 * sizeof(GL_FLOAT),
-        (void*)bitangentPtr
-    );
 
+    //0 Position
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
-    glEnableVertexAttribArray(3);
-    glEnableVertexAttribArray(4);
-
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+
+    /*****************SHIP 2 RENDERING*********************/
+    std::string path2 = "3D/Fireboat V1/ship2.obj";
+    std::vector<tinyobj::shape_t> shapes2;
+    std::vector<tinyobj::material_t> materials2;
+    std::string warning2, error2;
+
+    tinyobj::attrib_t attributes2;
+
+    bool success2 = tinyobj::LoadObj(
+        &attributes2,
+        &shapes2,
+        &materials2,
+        &warning2,
+        &error2,
+        path2.c_str()
+    );
+
+    std::vector<GLfloat> fullVertexData2;
+    for (int i = 0; i < shapes2[0].mesh.indices.size(); i++) {
+        tinyobj::index_t vData2 = shapes2[0].mesh.indices[i];
+
+        int vertexIndex2 = vData2.vertex_index * 3;
+        int uvIndex2 = vData2.texcoord_index * 2;
+        int normIndex2 = vData2.normal_index * 3;
+        //X
+        fullVertexData2.push_back(
+            attributes2.vertices[vertexIndex2]
+
+        );
+        //Y
+        fullVertexData2.push_back(
+            attributes2.vertices[vertexIndex2 + 1]
+
+        );
+        //Z
+        fullVertexData2.push_back(
+            attributes2.vertices[vertexIndex2 + 2]
+
+        );
+        //Normals
+        fullVertexData2.push_back(attributes2.normals[normIndex2]);
+        fullVertexData2.push_back(attributes2.normals[normIndex2 + 1]);
+        fullVertexData2.push_back(attributes2.normals[normIndex2 + 2]);
+
+        //U
+        fullVertexData2.push_back(
+            attributes2.texcoords[uvIndex2]
+
+        );
+        //V
+        fullVertexData2.push_back(
+            attributes2.texcoords[uvIndex2 + 1]
+
+        );
+
+    }
+    //Generate and Assign ID to VAO
+    glGenVertexArrays(1, &VAO2);
+    //Generate and Assign ID to VBO
+    glGenBuffers(1, &VBO2);
+
+
+    glBindVertexArray(VAO2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+
+    //LOADING MESH
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(GL_FLOAT) * fullVertexData2.size(), //Indices ng array
+        fullVertexData2.data(), //array itself
+        GL_STATIC_DRAW
+    );
+
+    glVertexAttribPointer(0, // Position
+        3, // 3 properties: X,Y,Z
+        GL_FLOAT,
+        GL_FALSE,
+        //XYZUV
+        8 * sizeof(GL_FLOAT),
+        (void*)0);
+
+    GLuint normPtr2 = 3 * sizeof(GL_FLOAT);
+    glVertexAttribPointer(1,
+        3,//3 props
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)normPtr2
+    );
+    GLuint uvPtr2 = 6 * sizeof(GL_FLOAT);
+    glVertexAttribPointer(2,
+        2,//UV
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)uvPtr2
+    );
+
+
+    //0 Position
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    /****************Fightership Rendering************************/
+    std::string path3 = "3D/FighterShip/fightership.obj";
+    std::vector<tinyobj::shape_t> shapes3;
+    std::vector<tinyobj::material_t> materials3;
+    std::string warning3, error3;
+
+    tinyobj::attrib_t attributes3;
+
+    bool success3 = tinyobj::LoadObj(
+        &attributes3,
+        &shapes3,
+        &materials3,
+        &warning3,
+        &error3,
+        path3.c_str()
+    );
+
+    std::vector<GLfloat> fullVertexData3;
+    for (int i = 0; i < shapes3[0].mesh.indices.size(); i++) {
+        tinyobj::index_t vData3 = shapes3[0].mesh.indices[i];
+
+        int vertexIndex3 = vData3.vertex_index * 3;
+        int uvIndex3 = vData3.texcoord_index * 2;
+        int normIndex3 = vData3.normal_index * 3;
+        //X
+        fullVertexData3.push_back(
+            attributes3.vertices[vertexIndex3]
+
+        );
+        //Y
+        fullVertexData3.push_back(
+            attributes3.vertices[vertexIndex3 + 1]
+
+        );
+        //Z
+        fullVertexData3.push_back(
+            attributes3.vertices[vertexIndex3 + 2]
+
+        );
+        //Normals
+        fullVertexData3.push_back(attributes3.normals[normIndex3]);
+        fullVertexData3.push_back(attributes3.normals[normIndex3 + 1]);
+        fullVertexData3.push_back(attributes3.normals[normIndex3 + 2]);
+
+        //U
+        fullVertexData3.push_back(
+            attributes3.texcoords[uvIndex3]
+
+        );
+        //V
+        fullVertexData3.push_back(
+            attributes3.texcoords[uvIndex3 + 1]
+
+        );
+
+    }
+    //Generate and Assign ID to VAO
+    glGenVertexArrays(1, &VAO3);
+    //Generate and Assign ID to VBO
+    glGenBuffers(1, &VBO3);
+
+
+    glBindVertexArray(VAO3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO3);
+
+    //LOADING MESH
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(GL_FLOAT) * fullVertexData3.size(), //Indices ng array
+        fullVertexData3.data(), //array itself
+        GL_STATIC_DRAW
+    );
+
+    glVertexAttribPointer(0, // Position
+        3, // 3 properties: X,Y,Z
+        GL_FLOAT,
+        GL_FALSE,
+        //XYZUV
+        8 * sizeof(GL_FLOAT),
+        (void*)0);
+
+    GLuint normPtr3 = 3 * sizeof(GL_FLOAT);
+    glVertexAttribPointer(1,
+        3,//3 props
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)normPtr3
+    );
+    GLuint uvPtr3 = 6 * sizeof(GL_FLOAT);
+    glVertexAttribPointer(2,
+        2,//UV
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)uvPtr3
+    );
+
+
+    //0 Position
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    /*****************RacingBoat Rendering********************/
+    std::string path4 = "3D/RacingBoat/racingboat.obj";
+    std::vector<tinyobj::shape_t> shapes4;
+    std::vector<tinyobj::material_t> materials4;
+    std::string warning4, error4;
+
+    tinyobj::attrib_t attributes4;
+
+    bool success4 = tinyobj::LoadObj(
+        &attributes4,
+        &shapes4,
+        &materials4,
+        &warning4,
+        &error4,
+        path4.c_str()
+    );
+
+    std::vector<GLfloat> fullVertexData4;
+    for (int i = 0; i < shapes4[0].mesh.indices.size(); i++) {
+        tinyobj::index_t vData4 = shapes4[0].mesh.indices[i];
+
+        int vertexIndex4 = vData4.vertex_index * 3;
+        int uvIndex4 = vData4.texcoord_index * 2;
+        int normIndex4 = vData4.normal_index * 3;
+        //X
+        fullVertexData4.push_back(
+            attributes4.vertices[vertexIndex4]
+
+        );
+        //Y
+        fullVertexData4.push_back(
+            attributes4.vertices[vertexIndex4 + 1]
+
+        );
+        //Z
+        fullVertexData4.push_back(
+            attributes4.vertices[vertexIndex4 + 2]
+
+        );
+        //Normals
+        fullVertexData4.push_back(attributes4.normals[normIndex4]);
+        fullVertexData4.push_back(attributes4.normals[normIndex4 + 1]);
+        fullVertexData4.push_back(attributes4.normals[normIndex4 + 2]);
+
+        //U
+        fullVertexData4.push_back(
+            attributes4.texcoords[uvIndex4]
+
+        );
+        //V
+        fullVertexData4.push_back(
+            attributes4.texcoords[uvIndex4 + 1]
+
+        );
+
+    }
+    //Generate and Assign ID to VAO
+    glGenVertexArrays(1, &VAO4);
+    //Generate and Assign ID to VBO
+    glGenBuffers(1, &VBO4);
+
+
+    glBindVertexArray(VAO4);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO4);
+
+    //LOADING MESH
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(GL_FLOAT) * fullVertexData4.size(), //Indices ng array
+        fullVertexData4.data(), //array itself
+        GL_STATIC_DRAW
+    );
+
+    glVertexAttribPointer(0, // Position
+        3, // 3 properties: X,Y,Z
+        GL_FLOAT,
+        GL_FALSE,
+        //XYZUV
+        8 * sizeof(GL_FLOAT),
+        (void*)0);
+
+    GLuint normPtr4 = 3 * sizeof(GL_FLOAT);
+    glVertexAttribPointer(1,
+        3,//3 props
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)normPtr4
+    );
+    GLuint uvPtr4 = 6 * sizeof(GL_FLOAT);
+    glVertexAttribPointer(2,
+        2,//UV
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)uvPtr4
+    );
+
+
+    //0 Position
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    /*****************Squid Rendering********************/
+    std::string path5 = "3D/squid.obj";
+    std::vector<tinyobj::shape_t> shapes5;
+    std::vector<tinyobj::material_t> materials5;
+    std::string warning5, error5;
+
+    tinyobj::attrib_t attributes5;
+
+    bool success5 = tinyobj::LoadObj(
+        &attributes5,
+        &shapes5,
+        &materials5,
+        &warning5,
+        &error5,
+        path5.c_str()
+    );
+
+    std::vector<GLfloat> fullVertexData5;
+    for (int i = 0; i < shapes5[0].mesh.indices.size(); i++) {
+        tinyobj::index_t vData5 = shapes5[0].mesh.indices[i];
+
+        int vertexIndex5 = vData5.vertex_index * 3;
+        int uvIndex5 = vData5.texcoord_index * 2;
+        int normIndex5 = vData5.normal_index * 3;
+        //X
+        fullVertexData5.push_back(
+            attributes5.vertices[vertexIndex5]
+
+        );
+        //Y
+        fullVertexData5.push_back(
+            attributes5.vertices[vertexIndex5 + 1]
+
+        );
+        //Z
+        fullVertexData5.push_back(
+            attributes5.vertices[vertexIndex5 + 2]
+
+        );
+        //Normals
+        fullVertexData5.push_back(attributes5.normals[normIndex5]);
+        fullVertexData5.push_back(attributes5.normals[normIndex5 + 1]);
+        fullVertexData5.push_back(attributes5.normals[normIndex5 + 2]);
+
+        //U
+        fullVertexData5.push_back(
+            attributes5.texcoords[uvIndex5]
+
+        );
+        //V
+        fullVertexData5.push_back(
+            attributes5.texcoords[uvIndex5 + 1]
+
+        );
+
+    }
+    //Generate and Assign ID to VAO
+    glGenVertexArrays(1, &VAO5);
+    //Generate and Assign ID to VBO
+    glGenBuffers(1, &VBO5);
+
+
+    glBindVertexArray(VAO5);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO5);
+
+    //LOADING MESH
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(GL_FLOAT) * fullVertexData5.size(), //Indices ng array
+        fullVertexData5.data(), //array itself
+        GL_STATIC_DRAW
+    );
+
+    glVertexAttribPointer(0, // Position
+        3, // 3 properties: X,Y,Z
+        GL_FLOAT,
+        GL_FALSE,
+        //XYZUV
+        8 * sizeof(GL_FLOAT),
+        (void*)0);
+
+    GLuint normPtr5 = 3 * sizeof(GL_FLOAT);
+    glVertexAttribPointer(1,
+        3,//3 props
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)normPtr5
+    );
+    GLuint uvPtr5 = 6 * sizeof(GL_FLOAT);
+    glVertexAttribPointer(2,
+        2,//UV
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)uvPtr5
+    );
+
+
+    //0 Position
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    /*****************WhaleShark Rendering********************/
+    std::string path6 = "3D/whaleshark.obj";
+    std::vector<tinyobj::shape_t> shapes6;
+    std::vector<tinyobj::material_t> materials6;
+    std::string warning6, error6;
+
+    tinyobj::attrib_t attributes6;
+
+    bool success6 = tinyobj::LoadObj(
+        &attributes6,
+        &shapes6,
+        &materials6,
+        &warning6,
+        &error6,
+        path6.c_str()
+    );
+
+    std::vector<GLfloat> fullVertexData6;
+    for (int i = 0; i < shapes6[0].mesh.indices.size(); i++) {
+        tinyobj::index_t vData6 = shapes6[0].mesh.indices[i];
+
+        int vertexIndex6 = vData6.vertex_index * 3;
+        int uvIndex6 = vData6.texcoord_index * 2;
+        int normIndex6 = vData6.normal_index * 3;
+        //X
+        fullVertexData6.push_back(
+            attributes6.vertices[vertexIndex6]
+
+        );
+        //Y
+        fullVertexData6.push_back(
+            attributes6.vertices[vertexIndex6 + 1]
+
+        );
+        //Z
+        fullVertexData6.push_back(
+            attributes6.vertices[vertexIndex6 + 2]
+
+        );
+        //Normals
+        fullVertexData6.push_back(attributes6.normals[normIndex6]);
+        fullVertexData6.push_back(attributes6.normals[normIndex6 + 1]);
+        fullVertexData6.push_back(attributes6.normals[normIndex6 + 2]);
+
+        //U
+        fullVertexData6.push_back(
+            attributes6.texcoords[uvIndex6]
+
+        );
+        //V
+        fullVertexData6.push_back(
+            attributes6.texcoords[uvIndex6 + 1]
+
+        );
+
+    }
+    //Generate and Assign ID to VAO
+    glGenVertexArrays(1, &VAO6);
+    //Generate and Assign ID to VBO
+    glGenBuffers(1, &VBO6);
+
+
+    glBindVertexArray(VAO6);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO6);
+
+    //LOADING MESH
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(GL_FLOAT) * fullVertexData6.size(), //Indices ng array
+        fullVertexData6.data(), //array itself
+        GL_STATIC_DRAW
+    );
+
+    glVertexAttribPointer(0, // Position
+        3, // 3 properties: X,Y,Z
+        GL_FLOAT,
+        GL_FALSE,
+        //XYZUV
+        8 * sizeof(GL_FLOAT),
+        (void*)0);
+
+    GLuint normPtr6 = 3 * sizeof(GL_FLOAT);
+    glVertexAttribPointer(1,
+        3,//3 props
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)normPtr6
+    );
+    GLuint uvPtr6 = 6 * sizeof(GL_FLOAT);
+    glVertexAttribPointer(2,
+        2,//UV
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)uvPtr6
+    );
+
+
+    //0 Position
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    /*****************SUBMARINE Rendering********************/
+    std::string path7 = "3D/submarine.obj";
+    std::vector<tinyobj::shape_t> shapes7;
+    std::vector<tinyobj::material_t> materials7;
+    std::string warning7, error7;
+
+    tinyobj::attrib_t attributes7;
+
+    bool success7 = tinyobj::LoadObj(
+        &attributes7,
+        &shapes7,
+        &materials7,
+        &warning7,
+        &error7,
+        path7.c_str()
+    );
+
+    std::vector<GLfloat> fullVertexData7;
+    for (int i = 0; i < shapes7[0].mesh.indices.size(); i++) {
+        tinyobj::index_t vData7 = shapes7[0].mesh.indices[i];
+
+        int vertexIndex7 = vData7.vertex_index * 3;
+        int uvIndex7 = vData7.texcoord_index * 2;
+        int normIndex7 = vData7.normal_index * 3;
+        //X
+        fullVertexData7.push_back(
+            attributes7.vertices[vertexIndex7]
+
+        );
+        //Y
+        fullVertexData7.push_back(
+            attributes7.vertices[vertexIndex7 + 1]
+
+        );
+        //Z
+        fullVertexData7.push_back(
+            attributes7.vertices[vertexIndex7 + 2]
+
+        );
+        //Normals
+        fullVertexData7.push_back(attributes7.normals[normIndex7]);
+        fullVertexData7.push_back(attributes7.normals[normIndex7 + 1]);
+        fullVertexData7.push_back(attributes7.normals[normIndex7 + 2]);
+
+        //U
+        fullVertexData7.push_back(
+            attributes7.texcoords[uvIndex7]
+
+        );
+        //V
+        fullVertexData7.push_back(
+            attributes7.texcoords[uvIndex7 + 1]
+
+        );
+
+    }
+    //Generate and Assign ID to VAO
+    glGenVertexArrays(1, &VAO7);
+    //Generate and Assign ID to VBO
+    glGenBuffers(1, &VBO7);
+
+
+    glBindVertexArray(VAO7);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO7);
+
+    //LOADING MESH
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(GL_FLOAT) * fullVertexData7.size(), //Indices ng array
+        fullVertexData7.data(), //array itself
+        GL_STATIC_DRAW
+    );
+
+    glVertexAttribPointer(0, // Position
+        3, // 3 properties: X,Y,Z
+        GL_FLOAT,
+        GL_FALSE,
+        //XYZUV
+        8 * sizeof(GL_FLOAT),
+        (void*)0);
+
+    GLuint normPtr7 = 3 * sizeof(GL_FLOAT);
+    glVertexAttribPointer(1,
+        3,//3 props
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)normPtr7
+    );
+    GLuint uvPtr7 = 6 * sizeof(GL_FLOAT);
+    glVertexAttribPointer(2,
+        2,//UV
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),//XYZUV
+        (void*)uvPtr7
+    );
+
+
+    //0 Position
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+
+    glm::mat4 identity_matrix = glm::mat4(1.0f);
+
 
     glm::mat4 projection_matrix = glm::perspective(
         glm::radians(60.0f),
@@ -539,111 +1000,37 @@ int main(void)
         0.1f,
         100.0f
     );
+    float theta = -90.0f;
 
-    glm::vec3 lightPos = glm::vec3(-1, 5, 1);
-    glm::vec3 lightColor = glm::vec3(1, 1, 1);
+    glm::vec3 lightPos = glm::vec3(1, 4, 1);
+    glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
-    float ambientStr = 0.35f;
+    //Ambient
+    float ambientStr = 0.5f;
     glm::vec3 ambientColor = lightColor;
 
-    float specStr = 0.5f; // 0.5
-    float specPhong = 16.0f; // 16
+    //Spec
+    float specStr = 1.0f;
+    float specPhong = 10.0f;
 
-    float constant = 1.0f;
-    float linear = 0.1f;
-    float quadratic = 0.04f;
-
-
+    /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glBlendEquation(GL_FUNC_ADD);
+
 
 
         glm::vec3 cameraPos = glm::vec3(0, 0, 10.f);
         glm::mat4 cameraPosMatrix = glm::translate(glm::mat4(1.0f), cameraPos * -1.f);
 
         glm::vec3 WorldUp = glm::normalize(glm::vec3(0, 1.f, 0));
-        glm::vec3 CameraCenter = glm::vec3(0, 0.f, 0.f);
-
-        glm::vec3 F = CameraCenter - cameraPos;
-        F = glm::normalize(F);
-
-        glm::vec3 R = glm::cross(F, WorldUp);
-        glm::vec3 U = glm::cross(R, F);
-
-        glm::mat4 cameraOrientationMatrix = glm::mat4(1.0f);
-
-        glm::mat4 transformation_matrix = glm::mat4(1.0f);
-
-        transformation_matrix = glm::translate(transformation_matrix,
-            glm::vec3(x, y, z)
-        );
-
-        transformation_matrix = glm::scale(transformation_matrix,
-            glm::vec3(scale_x, scale_y, scale_z)
-        );
-
-        transformation_matrix = glm::rotate(transformation_matrix,
-            glm::radians(theta),
-            glm::normalize(glm::vec3(rot_x, rot_y, rot_z))
-        );
-
-        transformation_matrix = glm::rotate(transformation_matrix,
-            glm::radians(-90.f),
-            glm::normalize(glm::vec3(0, 0, 1))
-        );
-
-
-        unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
-        glUniform3fv(lightPosLoc, 1, glm::value_ptr(lightPos));
-
-        unsigned int lightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
-        glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
-
-        unsigned int ambientStrLoc = glGetUniformLocation(shaderProgram, "ambientStr");
-        glUniform1f(ambientStrLoc, ambientStr);
-
-        unsigned int ambientColorLoc = glGetUniformLocation(shaderProgram, "ambientColor");
-        glUniform3fv(ambientColorLoc, 1, glm::value_ptr(ambientColor));
-
-        unsigned int cameraPosLoc = glGetUniformLocation(shaderProgram, "cameraPos");
-        glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
-
-        unsigned int specStrLoc = glGetUniformLocation(shaderProgram, "specStr");
-        glUniform1f(specStrLoc, specStr);
-
-        unsigned int specPhongLoc = glGetUniformLocation(shaderProgram, "specPhog");
-        glUniform1f(specPhongLoc, specPhong);
-
-        unsigned int constantLoc = glGetUniformLocation(shaderProgram, "constant");
-        glUniform1f(constantLoc, constant);
-
-        unsigned int linearLoc = glGetUniformLocation(shaderProgram, "linear");
-        glUniform1f(linearLoc, linear);
-
-        unsigned int quadraticLoc = glGetUniformLocation(shaderProgram, "quadratic");
-        glUniform1f(quadraticLoc, quadratic);
-
-        glActiveTexture(GL_TEXTURE0);
-        GLuint tex0Address = glGetUniformLocation(shaderProgram, "tex0");
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glUniform1i(tex0Address, 0);
-
-        glActiveTexture(GL_TEXTURE1);
-        GLuint tex1Address = glGetUniformLocation(shaderProgram, "norm_tex");
-        glBindTexture(GL_TEXTURE_2D, norm_tex);
-        glUniform1i(tex1Address, 1);
+        glm::vec3 CameraCenter = glm::vec3(0, 0.0f, 0);
 
         glm::mat4 viewMatrix = glm::lookAt(cameraPos, CameraCenter, WorldUp);
-        unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection_matrix));
-
         glDepthMask(GL_FALSE);
-        glDepthFunc(GL_LEQUAL);
+        glDepthFunc(GL_EQUAL);
+
         glUseProgram(skybox_shaderProgram);
 
         glm::mat4 sky_view = glm::mat4(1.f);
@@ -656,7 +1043,7 @@ int main(void)
         glUniformMatrix4fv(sky_viewLoc, 1, GL_FALSE, glm::value_ptr(sky_view));
 
         glBindVertexArray(skyboxVAO);
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
@@ -666,25 +1053,125 @@ int main(void)
 
         glUseProgram(shaderProgram);
 
-        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
-
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-
+        theta += 0.1f;
+        //SHIP1
+        glm::mat4 transformation_matrix = glm::mat4(1.0f);
+        transformation_matrix = glm::translate(transformation_matrix, glm::vec3(1.0f, 3.0f, 3.0f));
+        transformation_matrix = glm::scale(transformation_matrix, glm::vec3(0.005f, 0.005f, 0.005f));
+        transformation_matrix = glm::rotate(transformation_matrix, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc, 1, GL_FALSE, glm::value_ptr(transformation_matrix));
+        glActiveTexture(GL_TEXTURE0);
+        GLuint tex0Address = glGetUniformLocation(shaderProgram, "tex0");
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glUniform1i(tex0Address, 0);
 
-        glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
+        unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection_matrix));
 
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 14);
+        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
 
+
+        unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
+        glUniform3fv(lightPosLoc, 1, glm::value_ptr(lightPos));
+
+        unsigned int lightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
+        glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
+
+        //Ambient
+        unsigned int ambientStrLoc = glGetUniformLocation(shaderProgram, "ambientStr");
+        glUniform1f(ambientStrLoc, ambientStr);
+
+        unsigned int ambientColorLoc = glGetUniformLocation(shaderProgram, "ambientColor");
+        glUniform3fv(ambientColorLoc, 1, glm::value_ptr(ambientColor));
+
+        //Spec
+        unsigned int cameraPosLoc = glGetUniformLocation(shaderProgram, "cameraPos");
+        glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
+        unsigned int specStrLoc = glGetUniformLocation(shaderProgram, "specStr");
+        glUniform1f(specStrLoc, specStr);
+        unsigned int specPhongLoc = glGetUniformLocation(shaderProgram, "specPhog");
+        glUniform1f(specPhongLoc, specPhong);
+
+        glUniform1f(glGetUniformLocation(shaderProgram, "constant"), 1.0f);
+        glUniform1f(glGetUniformLocation(shaderProgram, "lin"), 0.1f);
+        glUniform1f(glGetUniformLocation(shaderProgram, "quad"), 0.04f);
+
+        glUseProgram(shaderProgram); // Declare in loop once
+        glBindVertexArray(VAO); // Declare in loop once
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 8);
+
+        //SHIP2
+        glBindVertexArray(VAO2);
+        glm::mat4 transformation_matrix2 = glm::mat4(1.0f);
+        transformation_matrix2 = glm::translate(transformation_matrix2, glm::vec3(-1.0f, -1.0f, -1.0f));
+        transformation_matrix2 = glm::scale(transformation_matrix2, glm::vec3(0.005f, 0.005f, 0.005f));
+        transformation_matrix2 = glm::rotate(transformation_matrix2, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
+        unsigned int transformationLoc2 = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformationLoc2, 1, GL_FALSE, glm::value_ptr(transformation_matrix2));
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData2.size() / 8);
+
+        //FIGHTERSHIP
+        glBindVertexArray(VAO3);
+        glm::mat4 transformation_matrix3 = glm::mat4(1.0f);
+        transformation_matrix3 = glm::translate(transformation_matrix3, glm::vec3(2.0f, 0.0f, 0.0f));
+        transformation_matrix3 = glm::scale(transformation_matrix3, glm::vec3(0.003f, 0.003f, 0.003f));
+        transformation_matrix3 = glm::rotate(transformation_matrix3, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
+        unsigned int transformationLoc3 = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformationLoc3, 1, GL_FALSE, glm::value_ptr(transformation_matrix3));
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData3.size() / 8);
+
+        //RACINGBOAT
+        glBindVertexArray(VAO4);
+        glm::mat4 transformation_matrix4 = glm::mat4(1.0f);
+        transformation_matrix4 = glm::translate(transformation_matrix4, glm::vec3(-2.5f, -2.5f, 0.0f));
+        transformation_matrix4 = glm::scale(transformation_matrix4, glm::vec3(0.01f, 0.01f, 0.01f));
+        transformation_matrix4 = glm::rotate(transformation_matrix4, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
+        unsigned int transformationLoc4 = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformationLoc4, 1, GL_FALSE, glm::value_ptr(transformation_matrix4));
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData4.size() / 8);
+
+        //SQUID
+        glBindVertexArray(VAO5);
+        glm::mat4 transformation_matrix5 = glm::mat4(1.0f);
+        transformation_matrix5 = glm::translate(transformation_matrix5, glm::vec3(-4.5f, 4.0f, 0.0f));
+        transformation_matrix5 = glm::scale(transformation_matrix5, glm::vec3(0.1f, 0.1f, 0.1f));
+        transformation_matrix5 = glm::rotate(transformation_matrix5, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
+        unsigned int transformationLoc5 = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformationLoc5, 1, GL_FALSE, glm::value_ptr(transformation_matrix5));
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData5.size() / 8);
+
+        //WHALESHARK
+        glBindVertexArray(VAO6);
+        glm::mat4 transformation_matrix6 = glm::mat4(1.0f);
+        transformation_matrix6 = glm::translate(transformation_matrix6, glm::vec3(2.5f, -3.5f, 0.0f));
+        transformation_matrix6 = glm::scale(transformation_matrix6, glm::vec3(0.008f, 0.008f, 0.008f));
+        transformation_matrix6 = glm::rotate(transformation_matrix6, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
+        unsigned int transformationLoc6 = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformationLoc6, 1, GL_FALSE, glm::value_ptr(transformation_matrix6));
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData6.size() / 8);
+
+        //SUBMARINE
+        glBindVertexArray(VAO7);
+        glm::mat4 transformation_matrix7 = glm::mat4(1.0f);
+        transformation_matrix7 = glm::translate(transformation_matrix7, glm::vec3(-4.5f, -2.5f, 0.0f));
+        transformation_matrix7 = glm::scale(transformation_matrix7, glm::vec3(0.0008f, 0.0008f, 0.0008f));
+        transformation_matrix7 = glm::rotate(transformation_matrix7, glm::radians(theta), glm::normalize(glm::vec3(1, 0, 0)));
+        unsigned int transformationLoc7 = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformationLoc7, 1, GL_FALSE, glm::value_ptr(transformation_matrix7));
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData7.size() / 8);
+
+        /* Swap front and back buffers */
         glfwSwapBuffers(window);
+
+        /* Poll for and process events */
         glfwPollEvents();
     }
-
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    //glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;
