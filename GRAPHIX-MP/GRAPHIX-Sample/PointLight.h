@@ -18,9 +18,9 @@ public:
 		lightColor = glm::vec3(1, 1, 1);
 		lightPosition = glm::vec3(xPos, yPos, zPos);
 		// Init to 0 for unlit
-		ambientStr = 0.0f;
+		ambientStr = 2.5f;
 		specPhog = 10.0f;
-		specStr = 0.0f;
+		specStr = 5.0f;
 	}
 
 	void setPointLight(GLuint shaderProgram)

@@ -15,7 +15,7 @@ public:
 	{
 		lightPosition = glm::vec3(xPos, yPos, zPos);
 		direction = glm::vec3(0.0f, 0.0f, 0.0f);
-		ambientStr = 1.0f;
+		ambientStr = 2.0f;
 		specPhog = 3.0f;
 		specStr = 0.5f;
 	}

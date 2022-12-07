@@ -42,6 +42,11 @@ glm::vec3 WorldUp = glm::vec3(0.f, 1.f, 0.f);
 #include "DirectionLight.h"
 
 float subPos_z = 0.0f;
+float subPos_x = 0.0f;
+float subPos_y = -3.0f;
+
+PointLight pointlight = PointLight(subPos_x, subPos_y, subPos_z);
+DirectionLight directionlight = DirectionLight(5.0f, 12.0f, 0.0f);
 void keyInput(GLFWwindow* window);
 void mouseInput(GLFWwindow* window, double xPos, double yPos);
 
@@ -1047,12 +1052,16 @@ int main(void)
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        pointlight.setPointLight(shaderProgram);
+        directionlight.setDirectionLight(shaderProgram);
         currentTimePressed = glfwGetTime();
 
         glm::vec3 cameraPos = glm::vec3(0, 0, subPos_z+10.0f);
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        pointlight.lightPosition = glm::vec3(subPos_x, subPos_y, subPos_z - 5.0f);
 
         keyInput(window);
 
@@ -1105,33 +1114,33 @@ int main(void)
 
         unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+        */
 
 
+        //unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
+        //glUniform3fv(lightPosLoc, 1, glm::value_ptr(lightPos));
 
-        unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
-        glUniform3fv(lightPosLoc, 1, glm::value_ptr(lightPos));
+        //unsigned int lightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
+        //glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
 
-        unsigned int lightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
-        glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
+        ////Ambient
+        //unsigned int ambientStrLoc = glGetUniformLocation(shaderProgram, "ambientStr");
+        //glUniform1f(ambientStrLoc, ambientStr);
 
-        //Ambient
-        unsigned int ambientStrLoc = glGetUniformLocation(shaderProgram, "ambientStr");
-        glUniform1f(ambientStrLoc, ambientStr);
+        //unsigned int ambientColorLoc = glGetUniformLocation(shaderProgram, "ambientColor");
+        //glUniform3fv(ambientColorLoc, 1, glm::value_ptr(ambientColor));
 
-        unsigned int ambientColorLoc = glGetUniformLocation(shaderProgram, "ambientColor");
-        glUniform3fv(ambientColorLoc, 1, glm::value_ptr(ambientColor));
+        ////Spec
+        //unsigned int cameraPosLoc = glGetUniformLocation(shaderProgram, "cameraPos");
+        //glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
+        //unsigned int specStrLoc = glGetUniformLocation(shaderProgram, "specStr");
+        //glUniform1f(specStrLoc, specStr);
+        //unsigned int specPhongLoc = glGetUniformLocation(shaderProgram, "specPhog");
+        //glUniform1f(specPhongLoc, specPhong);
 
-        //Spec
-        unsigned int cameraPosLoc = glGetUniformLocation(shaderProgram, "cameraPos");
-        glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
-        unsigned int specStrLoc = glGetUniformLocation(shaderProgram, "specStr");
-        glUniform1f(specStrLoc, specStr);
-        unsigned int specPhongLoc = glGetUniformLocation(shaderProgram, "specPhog");
-        glUniform1f(specPhongLoc, specPhong);
-
-        glUniform1f(glGetUniformLocation(shaderProgram, "constant"), 1.0f);
-        glUniform1f(glGetUniformLocation(shaderProgram, "lin"), 0.1f);
-        glUniform1f(glGetUniformLocation(shaderProgram, "quad"), 0.04f);
+        //glUniform1f(glGetUniformLocation(shaderProgram, "constant"), 1.0f);
+        //glUniform1f(glGetUniformLocation(shaderProgram, "lin"), 0.1f);
+        //glUniform1f(glGetUniformLocation(shaderProgram, "quad"), 0.04f);
 
         glUseProgram(shaderProgram); // Declare in loop once
         glBindVertexArray(VAO); // Declare in loop once

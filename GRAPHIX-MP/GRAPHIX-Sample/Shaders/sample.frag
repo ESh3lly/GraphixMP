@@ -1,80 +1,99 @@
-#version 330 core // Version
-
-uniform sampler2D tex0;
-uniform sampler2D norm_tex;
-
+#version 330 core //Version
+//Point Light
 uniform vec3 lightPos;
 uniform vec3 lightColor;
 
-uniform float ambientStr;
-uniform vec3 ambientColor;
-
-uniform vec3 cameraPos;
-uniform float specStr;
-uniform float specPhog;
-
-// Added Constant & Linear & Quadratic for the Attenuation formula
-uniform float constant;
-uniform float linear;
-uniform float quadratic;
-
+uniform vec4 color;
+uniform sampler2D tex0;
+out vec4 FragColor; //Color of the Pixel
 in vec2 texCoord;
 in vec3 normCoord;
 in vec3 fragPos;
 
-in mat3 TBN;
+uniform vec3 direction;
 
-out vec4 FragColor; // Color of the Pixel
+//Ambient
+uniform float ambientStr;
+uniform vec3 ambientColor;
 
-void main() {
-	//FragColor = vec4(0.5f, 0f, 0f, 1f);
+//Direction Light
+uniform float ambientStr2;
+uniform vec3 ambientColor2;
+uniform float specStr2;
+uniform float specPhog2;
+uniform vec3 lightColor2;
+//Spec
+uniform vec3 cameraPos;
+uniform float specStr;
+uniform float specPhog;
 
-	vec4 pixelColor = texture(tex0, texCoord);
+//Vars needed for point light attenuation
+uniform float constant; //light constant value
+uniform float lin; //Linear var for light
+uniform float quad; //Quadratic var for point light
+
+vec4 pointlight(){
+    vec3 normal = normalize(normCoord);
+
+    vec3 lightDir = normalize(lightPos - fragPos);
+    float diff = max(dot(normal,lightDir), 0.0f);
+
+    vec3 diffuse = diff * lightColor;
+    vec3 ambientCol = ambientStr * ambientColor;
+
+    vec3 viewDir = normalize(cameraPos - fragPos);
+    vec3 reflectDir = reflect(-lightDir, normal);
+
+    float spec = pow(
+    max(
+    dot(reflectDir, viewDir), 0.1f
+      ), 
+      specPhog
+     );
+     vec3 specCol = spec * specStr * lightColor;
+
+     //Attenuation for point light intensity relative to distance from object
+     //Compute distance from light and object
+     float distance = length(lightPos - fragPos); 
+     //Compute for reduction/increase of light based on distance between light and object
+     float attenuation = 1.0f / (constant + lin * distance + quad * (distance * distance)); 
+
+     //Apply attenuation to 3 types of lighting implemented
+     diffuse *= attenuation;
+     ambientCol *= attenuation;
+     specCol *= attenuation;
+
+     return vec4(diffuse + ambientCol + specCol, 1.0f) * texture(tex0, texCoord);
+}
+//Implement separate method for direction light to feed to FragColor
+vec4 directionlight(){
+   vec3 normal = normalize(normCoord);
+
+    vec3 lightDir = normalize(-direction);
+    float diff = max(dot(normal,lightDir), 0.0f);
+
+    vec3 diffuse = diff * lightColor2;
+    vec3 ambientCol = ambientStr2 * ambientColor2;
+
+    vec3 viewDir = normalize(cameraPos - fragPos);
+    vec3 reflectDir = reflect(-lightDir, normal);
+
+    float spec = pow(
+    max(
+    dot(reflectDir, viewDir), 0.1f
+      ), 
+      specPhog2
+     );
+     vec3 specCol = spec * specStr2 * lightColor2;
 
 
-	if(pixelColor.a < 0.1) {
-		discard;
-	}
+     return vec4(diffuse + ambientCol + specCol, 1.0f) * texture(tex0, texCoord);
+}
 
-	//vec3 normal = normalize(normCoord);
+void main(){
+   
+    //FragColor = color;
+   
 
-	vec3 normal = texture(norm_tex, texCoord).rgb;
-
-	normal = normalize(normal * 2.0 - 1.0);
-
-	normal = normalize(TBN * normal);
-
-	vec3 lightDir = normalize(lightPos - fragPos);
-
-	float diff = max(
-		dot(normal, lightDir) , 0.0f
-	);
-
-	vec3 diffuse = diff * lightColor;
-
-	vec3 ambientCol = ambientStr * ambientColor;
-
-	vec3 viewDir = normalize(cameraPos - fragPos);
-	vec3 reflectDir = reflect(-lightDir, normal);
-
-	float spec = pow(
-		max(
-			dot(reflectDir, viewDir), 0.1f
-		),
-	specPhog );
-
-	vec3 specCol = spec * specStr * lightColor;
-
-	float distance = length(lightPos - fragPos);
-
-	// Calculate the attenuation (Which is a property of light when it loses it intensity when further from the source)
-	float attenuation = 5.0f / (constant + linear * distance + quadratic * (distance * distance));
-
-	// Multiple it to ambient diffuse and specular to apply the attenuation effect
-	ambientCol *= attenuation;
-	diffuse *= attenuation;
-	specCol *= attenuation;
-
-	FragColor = vec4(specCol + diffuse + ambientCol, 1.0f) *  pixelColor;
-
+     FragColor =  directionlight() + pointlight();
 }
