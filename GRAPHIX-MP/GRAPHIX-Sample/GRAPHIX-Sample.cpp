@@ -1245,32 +1245,34 @@ void keyInput(GLFWwindow* window) {
 
 void mouseInput(GLFWwindow* window, double xPos, double yPos) {
 
-    if (firstMouse) {
+    if (camMode == 1) {
+        if (firstMouse) {
+            lastX = xPos;
+            lastY = yPos;
+            firstMouse = false;
+        }
+
+        float xoffset = xPos - lastX;
+        float yoffset = lastY - yPos;
         lastX = xPos;
         lastY = yPos;
-        firstMouse = false;
+
+        float sensitivity = 0.1f;
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
+
+        yaw += xoffset;
+        pitch += yoffset;
+
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
+
+        glm::vec3 front = glm::vec3(0.f, 0.f, 0.f);
+        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.y = sin(glm::radians(pitch));
+        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        CameraCenter = glm::normalize(front);
     }
-
-    float xoffset = xPos - lastX;
-    float yoffset = lastY - yPos;
-    lastX = xPos;
-    lastY = yPos;
-
-    float sensitivity = 0.1f;
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
-
-    yaw += xoffset;
-    pitch += yoffset;
-
-    if (pitch > 89.0f)
-        pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
-
-    glm::vec3 front = glm::vec3(0.f, 0.f, 0.f);
-    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    CameraCenter = glm::normalize(front);
 }
