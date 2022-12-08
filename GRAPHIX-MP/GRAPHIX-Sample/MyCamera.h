@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-float radius = 0.1f;
+float radius = 10.f;
 float camX = 0.0f;
 float camZ = 1.f;
 float width = 750.0f;
