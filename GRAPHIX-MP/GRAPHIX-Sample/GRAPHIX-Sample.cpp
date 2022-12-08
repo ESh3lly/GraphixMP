@@ -1276,13 +1276,13 @@ void keyInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && (camMode == 2)) {
         orthoPitch -= 1.f;
         pitch -= 1.f;
-        if (orthoPitch > 90.0f)
-            orthoPitch = 90.0f;
-        if (orthoPitch < -90.0f)
-            orthoPitch = -90.0f;
-        if (pitch > 90.0f)
-            pitch = 90.0f;
-        if (pitch < -90.0f)
+        if (orthoPitch > 45.0f)
+            orthoPitch = 45.0f;
+        if (orthoPitch < -45.0f)
+            orthoPitch = -45.0f;
+        if (pitch > 45.0f)
+            pitch = 45.0f;
+        if (pitch < -45.0f)
             pitch = -90.0f;
         yawpitch();
     }
@@ -1290,14 +1290,14 @@ void keyInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && (camMode == 2)) {
 
         orthoYaw -= 1.f;
-        yaw -= 1.f;
+        yaw += 1.f;
         yawpitch();
     }
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && (camMode == 2)) {
 
         orthoYaw += 1.f;
-        yaw += 1.f;
+        yaw -= 1.f;
         yawpitch();
     }
 
@@ -1344,7 +1344,7 @@ void mouseInput(GLFWwindow* window, double xPos, double yPos) {
             firstMouse = false;
         }
 
-        float xoffset = xPos - lastX;
+        float xoffset = -(xPos - lastX);
         float yoffset = lastY - yPos;
         lastX = xPos;
         lastY = yPos;

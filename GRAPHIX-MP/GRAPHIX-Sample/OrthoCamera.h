@@ -33,7 +33,7 @@ public:
 		float ccz = sin(glm::radians(orthoYaw)) * cos(glm::radians(orthoPitch));
 
 		glm::vec3 OrthoCamPos = glm::vec3(subPos_x, 10.f, subPos_z);
-		glm::vec3 OrthoUp = glm::vec3(0, 1.0f, -1.f);
+		glm::vec3 OrthoUp = glm::vec3(0, 1.0f, 0.f);
 		glm::vec3 OrthoCamCenter = glm::normalize(glm::vec3(ccx, ccy, ccz));
 
 		glm::mat4 view_matrix = glm::lookAt(OrthoCamPos, OrthoCamPos + OrthoCamCenter, OrthoUp);
