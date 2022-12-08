@@ -39,6 +39,15 @@ float subPos_z = 0.0f;
 float subPos_x = 0.0f;
 float subPos_y = -3.0f;
 
+float planePos_z = -12.f;
+
+std::vector<GLfloat> fullVertexDataShip1, fullVertexDataShip2, fullVertexDataFighterShip, fullVertexDataRacingBoat, fullVertexDataWhaleShark, fullVertexDataSubmarine, fullVertexDataSquid, fullVertexDataPlane;
+GLuint ship1Texture, ship2Texture, fighterShipTexture, racingBoatTexture, whaleSharkTexture, submarineTexture, squidTexture, planeTexture;
+
+GLuint VAO_ship1, VBO_ship1, VAO_ship2, VBO_ship2, VAO_fighterShip, VBO_fighterShip, VAO_racingBoat, VBO_racingBoat, VAO_whaleShark, VBO_whaleShark, VAO_submarine, VBO_submarine, VAO_squid, VBO_squid, VAO_plane, VBO_plane; //EBO, VBO_UV;
+
+
+
 #include "MyCamera.h"
 #include "PerspectiveCamera1.h"
 #include "PerspectiveCamera2.h"
@@ -48,11 +57,6 @@ float subPos_y = -3.0f;
 #include "DirectionLight.h"
 
 
-
-std::vector<GLfloat> fullVertexDataShip1, fullVertexDataShip2, fullVertexDataFighterShip, fullVertexDataRacingBoat, fullVertexDataWhaleShark, fullVertexDataSubmarine, fullVertexDataSquid;
-GLuint ship1Texture, ship2Texture, fighterShipTexture, racingBoatTexture, whaleSharkTexture, submarineTexture, squidTexture;
-
-GLuint VAO_ship1, VBO_ship1, VAO_ship2, VBO_ship2, VAO_fighterShip, VBO_fighterShip, VAO_racingBoat, VBO_racingBoat, VAO_whaleShark, VBO_whaleShark, VAO_submarine, VBO_submarine, VAO_squid, VBO_squid; //EBO, VBO_UV;
 
 
 
@@ -317,7 +321,7 @@ GLuint loadTexturesRGBA(const char* texturePath, GLuint newTexture) {
         img_width,
         img_height,
         0,
-        GL_RGB,
+        GL_RGBA,
         GL_UNSIGNED_BYTE,
         tex_bytes
     );
@@ -884,6 +888,59 @@ int main(void)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    /* Plane */
+
+    fullVertexDataPlane = loadModel("3D/plane.obj", fullVertexDataPlane);
+    planeTexture = loadTexturesRGBA("3D/Textures/gradient.png", planeTexture);
+
+    glGenVertexArrays(1, &VAO_plane);
+    glGenBuffers(1, &VBO_plane);
+
+    glBindVertexArray(VAO_plane);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_plane);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* fullVertexDataPlane.size(), fullVertexDataPlane.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GL_FLOAT), (void*)0);
+
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        14 * sizeof(GL_FLOAT),
+        (void*)normPtr
+    );
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(GL_FLOAT), (void*)uvPtr);
+
+    glVertexAttribPointer(
+        3,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        14 * sizeof(GL_FLOAT),
+        (void*)tangentPtr
+    );
+
+    glVertexAttribPointer(
+        4,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        14 * sizeof(GL_FLOAT),
+        (void*)bitangentPtr
+    );
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
+    glEnableVertexAttribArray(4);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
     glm::mat4 identity_matrix = glm::mat4(1.0f);
 
     glm::mat4 projection_matrix = glm::perspective(
@@ -918,7 +975,7 @@ int main(void)
         directionlight.setDirectionLight(shaderProgram);
         currentTimePressed = glfwGetTime();
 
-        
+
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -965,20 +1022,21 @@ int main(void)
         unsigned int transformationLoc = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc, 1, GL_FALSE, glm::value_ptr(transformation_matrix));
 
-       
+
         /* Ship 1 */
 
         glActiveTexture(GL_TEXTURE0);
         GLuint tex0Address = glGetUniformLocation(shaderProgram, "tex0");
-        glBindTexture(GL_TEXTURE_2D, ship1Texture);
-        glUniform1i(tex0Address, 0);
-        
+        if (pov == 1) {
+            glBindTexture(GL_TEXTURE_2D, ship1Texture);
+            glUniform1i(tex0Address, 0);
+        }
 
         if (camMode == 1) {
             if (pov == 1)
                 FPVCam.getPCamera(shaderProgram, viewMatrix);
             else if (pov == 2)
-                TPVCam.getPCamera2(shaderProgram, viewMatrix);
+                TPVCam.getPCamera2(shaderProgram, viewMatrix, tex0Address);
         }
         else if (camMode == 2)
             oCam.getOCamera(shaderProgram);
@@ -1023,9 +1081,10 @@ int main(void)
         //SHIP2
         glBindVertexArray(VAO_ship2);
 
-        glBindTexture(GL_TEXTURE_2D, ship2Texture);
-        glUniform1i(tex0Address, 0);
-
+        if ((pov == 1)||(camMode==2)) {
+            glBindTexture(GL_TEXTURE_2D, ship2Texture);
+            glUniform1i(tex0Address, 0);
+        }
 
         glm::mat4 transformation_matrix2 = glm::mat4(1.0f);
         transformation_matrix2 = glm::translate(transformation_matrix2, glm::vec3(-4.0f, -3.0f, -40.0f));
@@ -1038,8 +1097,10 @@ int main(void)
         //FIGHTERSHIP
         glBindVertexArray(VAO_fighterShip);
 
-        glBindTexture(GL_TEXTURE_2D, fighterShipTexture);
-        glUniform1i(tex0Address, 0);
+        if ((pov == 1) || (camMode == 2)) {
+            glBindTexture(GL_TEXTURE_2D, fighterShipTexture);
+            glUniform1i(tex0Address, 0);
+        }
 
         glm::mat4 transformation_matrix3 = glm::mat4(1.0f);
         transformation_matrix3 = glm::translate(transformation_matrix3, glm::vec3(-4.0f, -3.0f, -80.0f));
@@ -1053,8 +1114,10 @@ int main(void)
         //RACINGBOAT
         glBindVertexArray(VAO_racingBoat);
 
-        glBindTexture(GL_TEXTURE_2D, racingBoatTexture);
-        glUniform1i(tex0Address, 0);
+        if ((pov == 1) || (camMode == 2)) {
+            glBindTexture(GL_TEXTURE_2D, racingBoatTexture);
+            glUniform1i(tex0Address, 0);
+        }
 
         glm::mat4 transformation_matrix4 = glm::mat4(1.0f);
         transformation_matrix4 = glm::translate(transformation_matrix4, glm::vec3(4.5f, -3.0f, -60.0f));
@@ -1067,8 +1130,10 @@ int main(void)
         //SQUID
         glBindVertexArray(VAO_squid);
 
-        glBindTexture(GL_TEXTURE_2D, squidTexture);
-        glUniform1i(tex0Address, 0);
+        if ((pov == 1) || (camMode == 2)) {
+            glBindTexture(GL_TEXTURE_2D, squidTexture);
+            glUniform1i(tex0Address, 0);
+        }
 
         glm::mat4 transformation_matrix5 = glm::mat4(1.0f);
         transformation_matrix5 = glm::translate(transformation_matrix5, glm::vec3(-6.0f, -3.0f, -120.0f));
@@ -1081,8 +1146,10 @@ int main(void)
         //WHALESHARK
         glBindVertexArray(VAO_whaleShark);
 
-        glBindTexture(GL_TEXTURE_2D, whaleSharkTexture);
-        glUniform1i(tex0Address, 0);
+        if ((pov == 1) || (camMode == 2)) {
+            glBindTexture(GL_TEXTURE_2D, whaleSharkTexture);
+            glUniform1i(tex0Address, 0);
+        }
 
         glm::mat4 transformation_matrix6 = glm::mat4(1.0f);
         transformation_matrix6 = glm::translate(transformation_matrix6, glm::vec3(6.0f, -3.5f, -100.0f));
@@ -1095,9 +1162,11 @@ int main(void)
         //SUBMARINE
         glBindVertexArray(VAO_submarine);
 
-        glBindTexture(GL_TEXTURE_2D, submarineTexture);
-        glUniform1i(tex0Address, 0);
-
+        if ((pov == 1) || (camMode == 2)) {
+            glBindTexture(GL_TEXTURE_2D, submarineTexture);
+            glUniform1i(tex0Address, 0);
+        }
+        
         glm::mat4 transformation_matrix7 = glm::mat4(1.0f);
         transformation_matrix7 = glm::translate(transformation_matrix7, glm::vec3(0.0f, -3.0f, subPos_z));
         transformation_matrix7 = glm::scale(transformation_matrix7, glm::vec3(0.0007f, 0.0007f, 0.0007f));
@@ -1105,6 +1174,20 @@ int main(void)
         unsigned int transformationLoc7 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc7, 1, GL_FALSE, glm::value_ptr(transformation_matrix7));
         glDrawArrays(GL_TRIANGLES, 0, fullVertexDataSubmarine.size() / 14);
+
+        //PLANE
+
+        /*glBindTexture(GL_TEXTURE_2D, planeTexture);
+        glUniform1i(tex0Address, 0);
+        glBindVertexArray(VAO_plane);
+
+        glm::mat4 transformation_matrix8 = glm::mat4(1.0f);
+        transformation_matrix8 = glm::translate(transformation_matrix8, glm::vec3(0.0f, -3.0f, -10.f));
+        transformation_matrix8 = glm::scale(transformation_matrix8, glm::vec3(1.f, 1.f, 1.f));
+        transformation_matrix8 = glm::rotate(transformation_matrix8, glm::radians(-90.0f), glm::normalize(glm::vec3(0, 0, 1)));
+        unsigned int transformationLoc8 = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformationLoc8, 1, GL_FALSE, glm::value_ptr(transformation_matrix8));
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexDataPlane.size() / 14);*/
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -1133,6 +1216,9 @@ int main(void)
 
     glDeleteVertexArrays(1, &VAO_whaleShark);
     glDeleteBuffers(1, &VBO_whaleShark);
+
+    glDeleteVertexArrays(1, &VAO_plane);
+    glDeleteBuffers(1, &VBO_plane);
     //glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
@@ -1148,11 +1234,15 @@ void keyInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         cameraPos += cameraSpeed * CameraCenter;
         subPos_z -= 0.1f;
+        if (pov == 2)
+            planePos_z -= 0.1f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         cameraPos -= cameraSpeed * CameraCenter;
         subPos_z += 0.1f;
+        if (pov == 2)
+            planePos_z += 0.1f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {

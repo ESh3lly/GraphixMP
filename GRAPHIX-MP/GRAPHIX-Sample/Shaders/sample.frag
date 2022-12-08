@@ -34,6 +34,11 @@ uniform float lin; //Linear var for light
 uniform float quad; //Quadratic var for point light
 
 vec4 pointlight(){
+    vec4 pixelColor = texture(tex0, texCoord);
+	if(pixelColor.a < 0.1){
+		discard;
+	}
+    
     vec3 normal = normalize(normCoord);
 
     vec3 lightDir = normalize(lightPos - fragPos);
@@ -64,11 +69,15 @@ vec4 pointlight(){
      ambientCol *= attenuation;
      specCol *= attenuation;
 
-     return vec4(diffuse + ambientCol + specCol, 1.0f) * texture(tex0, texCoord);
+     return vec4(diffuse + ambientCol + specCol, 1.0f) * pixelColor;
 }
 
 //Implement separate method for direction light to feed to FragColor
 vec4 directionlight(){
+    vec4 pixelColor = texture(tex0, texCoord);
+	if(pixelColor.a < 0.1){
+		discard;
+	}
    vec3 normal = normalize(normCoord);
 
     vec3 lightDir = normalize(-direction);
@@ -89,7 +98,7 @@ vec4 directionlight(){
      vec3 specCol = spec * specStr2 * lightColor2;
 
 
-     return vec4(diffuse + ambientCol + specCol, 1.0f) * texture(tex0, texCoord);
+     return vec4(diffuse + ambientCol + specCol, 1.0f) * pixelColor;
 }
 
 void main(){

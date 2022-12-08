@@ -24,7 +24,8 @@ public:
 
 	/*orthographic projection draw part*/
 	void getOCamera(GLuint shaderProg) {
-		
+		glDisable(GL_BLEND);
+
 		glm::vec3 OrthoCamPos = glm::vec3(0, 10.f, 0.f);
 		glm::vec3 OrthoUp = glm::vec3(0, 1.0f, -1.f);
 		glm::vec3 OrthoCamCenter = glm::vec3(0, 6.f, 1.f);
@@ -51,6 +52,16 @@ public:
 			GL_FALSE,   //Transpose?
 			glm::value_ptr(projection_matrix)
 		);
+
+		/*glBindVertexArray(VAO_plane);
+
+		glm::mat4 transformation_matrix8 = glm::mat4(1.0f);
+		transformation_matrix8 = glm::translate(transformation_matrix8, glm::vec3(0.0f, -3.0f, -10.f));
+		transformation_matrix8 = glm::scale(transformation_matrix8, glm::vec3(0.0007f, 0.0007f, 0.0007f));
+		transformation_matrix8 = glm::rotate(transformation_matrix8, glm::radians(90.0f), glm::normalize(glm::vec3(1, 0, 0)));
+		unsigned int transformationLoc8 = glGetUniformLocation(shaderProg, "transform");
+		glUniformMatrix4fv(transformationLoc8, 1, GL_FALSE, glm::value_ptr(transformation_matrix8));
+		glDrawArrays(GL_TRIANGLES, 0, fullVertexDataPlane.size() / 14);*/
 	}
 
 };

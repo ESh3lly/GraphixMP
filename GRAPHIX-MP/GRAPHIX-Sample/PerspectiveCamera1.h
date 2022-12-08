@@ -13,7 +13,7 @@ public:
 
     /*perspective camera draw part*/
     void getPCamera(GLuint shaderProg, glm::mat4 viewMatrix) {
-
+        glDisable(GL_BLEND);
 
         unsigned int cameraPosLoc = glGetUniformLocation(shaderProg, "cameraPos");
         glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
@@ -40,5 +40,11 @@ public:
             GL_FALSE,   //Transpose?
             glm::value_ptr(projection_matrix)
         );
+
+    }
+
+    void loadTextures(GLuint currTexture, GLuint texAdd) {
+        glBindTexture(GL_TEXTURE_2D, currTexture);
+        glUniform1i(texAdd, 0);
     }
 };
