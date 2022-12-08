@@ -1244,16 +1244,29 @@ void keyInput(GLFWwindow* window) {
         if (pov == 2)
             planePos_z += 0.1f;
     }
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+        camMode=2;
+    }
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        cameraPos -= glm::normalize(glm::cross(CameraCenter, WorldUp)) * cameraSpeed;
+
+        subPos_x -= 0.1f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        cameraPos += glm::normalize(glm::cross(CameraCenter, WorldUp)) * cameraSpeed;
+
+        subPos_x += 0.1f;
     }
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
-        camMode=2;
+
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+
+        subPos_y -= 0.1f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+
+        if (subPos_y < 0.0f)
+            subPos_y += 0.1f;
     }
 
 }
