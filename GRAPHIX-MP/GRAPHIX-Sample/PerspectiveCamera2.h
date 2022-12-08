@@ -34,7 +34,7 @@ public:
         );
 
         glm::mat4 projection_matrix = glm::perspective(
-            glm::radians(60.0f),
+            glm::radians(100.0f),
             height / width,
             0.1f,
             100.f
@@ -62,6 +62,6 @@ public:
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA);
-        glBlendEquation(GL_FUNC_SUBTRACT);
+        glBlendEquation(GL_FUNC_ADD);
     }
 };

@@ -22,7 +22,10 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 float yaw = -90.0f;
-float pitch = 0.0f;
+float pitch = -90.0f;
+
+float orthoYaw = -90.0f;
+float orthoPitch = -90.0f;
 
 bool firstMouse = true;
 float lastX = 800.0f / 2.0;
@@ -39,7 +42,14 @@ float subPos_z = 0.0f;
 float subPos_x = 0.0f;
 float subPos_y = -3.0f;
 
-float planePos_z = -12.f;
+float camCen_x = 0.f;
+float camCen_y = 0.f;
+float camCen_z   = 0.f;
+
+float planePos_z = -15.f;
+
+float screenWidth = 1000.0f;
+float screenHeight = 1000.0f;
 
 std::vector<GLfloat> fullVertexDataShip1, fullVertexDataShip2, fullVertexDataFighterShip, fullVertexDataRacingBoat, fullVertexDataWhaleShark, fullVertexDataSubmarine, fullVertexDataSquid, fullVertexDataPlane;
 GLuint ship1Texture, ship2Texture, fighterShipTexture, racingBoatTexture, whaleSharkTexture, submarineTexture, squidTexture, planeTexture;
@@ -55,9 +65,6 @@ GLuint VAO_ship1, VBO_ship1, VAO_ship2, VBO_ship2, VAO_fighterShip, VBO_fighterS
 
 #include "SpotLight.h"
 #include "DirectionLight.h"
-
-
-
 
 
 int lightIntensity = 1;
@@ -96,18 +103,25 @@ void Key_Callback(GLFWwindow* window,
 
     }
     if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
-        if (pov == 1) {
-            camMode = 1;
-            pov = 2;
-        }
-        else if (pov == 2) {
-            camMode = 1;
-            pov = 1;
+        if (camMode == 1) {
+            if (pov == 1) {
+                pov = 2;
+            }
+            else if (pov == 2) {
+                pov = 1;
+            }
         }
     }
 
     if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
-        camMode = 2;
+        if (camMode == 1) {
+            camMode = 2;
+            std::cout << "cam 2" << std::endl;
+        }
+        else if (camMode == 2) {
+            camMode = 1;
+            std::cout << "cam 1" << std::endl;
+        }
     }
     
 }
@@ -333,6 +347,12 @@ GLuint loadTexturesRGBA(const char* texturePath, GLuint newTexture) {
 
     return newTexture;
 }
+void yawpitch() {
+    camCen_x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    camCen_y = sin(glm::radians(pitch));
+    camCen_z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    CameraCenter = glm::normalize(glm::vec3(camCen_x, camCen_y, camCen_z));
+}
 
 int main(void)
 {
@@ -341,8 +361,7 @@ int main(void)
     if (!glfwInit())
         return -1;
 
-    float screenWidth = 1000.0f;
-    float screenHeight = 1000.0f;
+   
 
     window = glfwCreateWindow(screenWidth, screenHeight, "Aguilar, Earl Angelo | Aquino, Karl Matthew | Lee, Jerickson", NULL, NULL);
     if (!window)
@@ -964,7 +983,7 @@ int main(void)
 
     PerspectiveCamera1 FPVCam(2);   //perspective camera
     PerspectiveCamera2 TPVCam(2);
-    OrthoCamera oCam(-50.0f, 50.0f, -50.0f, 50.0f, -50.f, 50.0f);    //orthographic projection
+    OrthoCamera oCam(-30.0f, 30.0f, -30.0f, 30.0f, -30.f, 30.0f);    //orthographic projection
     glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + CameraCenter, WorldUp);
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -1231,43 +1250,82 @@ void keyInput(GLFWwindow* window) {
     float cameraSpeed = 2.5 * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && (camMode != 2)) {
         cameraPos += cameraSpeed * CameraCenter;
         subPos_z -= 0.1f;
         if (pov == 2)
             planePos_z -= 0.1f;
     }
 
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && (camMode != 2)) {
         cameraPos -= cameraSpeed * CameraCenter;
         subPos_z += 0.1f;
         if (pov == 2)
             planePos_z += 0.1f;
     }
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
-        camMode=2;
-    }
 
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && (camMode != 2)) {
 
         subPos_x -= 0.05f;
     }
 
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && (camMode != 2)) {
 
         subPos_x += 0.05f;
     }
 
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && (camMode != 2)) {
 
         subPos_y -= 0.1f;
     }
 
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+    if ((glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)&&(camMode!=2)) {
 
         if (subPos_y < 0.0f)
             subPos_y += 0.1f;
     }
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && (camMode == 2)) {
+        orthoPitch += 1.f;
+        pitch += 1.f;
+        if (orthoPitch > 90.0f)
+            orthoPitch = 90.0f;
+        if (orthoPitch < -90.0f)
+            orthoPitch = -90.0f;
+        if (pitch > 90.0f)
+            pitch = 90.0f;
+        if (pitch < -90.0f)
+            pitch = -90.0f;
+        yawpitch();
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && (camMode == 2)) {
+        orthoPitch -= 1.f;
+        pitch -= 1.f;
+        if (orthoPitch > 90.0f)
+            orthoPitch = 90.0f;
+        if (orthoPitch < -90.0f)
+            orthoPitch = -90.0f;
+        if (pitch > 90.0f)
+            pitch = 90.0f;
+        if (pitch < -90.0f)
+            pitch = -90.0f;
+        yawpitch();
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && (camMode == 2)) {
+
+        orthoYaw -= 1.f;
+        yaw -= 1.f;
+        yawpitch();
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && (camMode == 2)) {
+
+        orthoYaw += 1.f;
+        yaw += 1.f;
+        yawpitch();
+    }
+
 
 }
 
@@ -1302,5 +1360,44 @@ void mouseInput(GLFWwindow* window, double xPos, double yPos) {
         front.y = sin(glm::radians(pitch));
         front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
         CameraCenter = glm::normalize(front);
+    }
+    if (camMode == 2) {
+        if (firstMouse) {
+            lastX = xPos;
+            lastY = yPos;
+            firstMouse = false;
+        }
+
+        float xoffset = xPos - lastX;
+        float yoffset = lastY - yPos;
+        lastX = xPos;
+        lastY = yPos;
+
+        float sensitivity = 0.1f;
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
+
+        orthoYaw += xoffset;
+        orthoPitch += yoffset;
+
+        if (orthoPitch > 89.0f)
+            orthoPitch = 89.0f;
+        if (orthoPitch < -89.0f)
+            orthoPitch = -89.0f;
+
+        yaw += xoffset;
+        pitch += yoffset;
+
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
+
+        glm::vec3 front = glm::vec3(0.f, 0.f, 0.f);
+        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.y = sin(glm::radians(pitch));
+        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        CameraCenter = glm::normalize(front);
+      
     }
 }
