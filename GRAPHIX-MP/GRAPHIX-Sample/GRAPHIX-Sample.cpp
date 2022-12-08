@@ -1220,6 +1220,7 @@ void keyInput(GLFWwindow* window) {
     float cameraSpeed = 2.5 * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && (camMode != 2)) {
         cameraPos += cameraSpeed * CameraCenter;
         subPos_z -= 0.1f;
@@ -1239,27 +1240,25 @@ void keyInput(GLFWwindow* window) {
         subPos_x -= 0.05f;
     }
 
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        cameraPos += glm::normalize(glm::cross(CameraCenter, WorldUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && (camMode != 2)) {
-
+        cameraPos += glm::normalize(glm::cross(CameraCenter, WorldUp)) * cameraSpeed;
         subPos_x += 0.05f;
     }
 
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-        subPos_y -= 0.1f;
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && (camMode != 2)) {
+        subPos_y -= 0.1f;
 
         std::cout << "Depth: " << subPos_y << "\n";
     }
 
-    if ((glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)&&(camMode!=2)) {
+    if ((glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) && (camMode!=2)) {
 
         if (subPos_y < 0.0f)
             subPos_y += 0.1f;
 
         std::cout << "Depth: " << subPos_y << "\n";
     }
+
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && (camMode == 2)) {
         orthoPitch += 1.f;
         pitch += 1.f;
@@ -1337,6 +1336,7 @@ void mouseInput(GLFWwindow* window, double xPos, double yPos) {
         front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
         CameraCenter = glm::normalize(front);
     }
+
     if (camMode == 2) {
         if (firstMouse) {
             lastX = xPos;
