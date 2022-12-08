@@ -37,7 +37,7 @@ public:
             glm::radians(100.0f),
             height / width,
             0.1f,
-            100.f
+            200.f
         );
 
         unsigned int projectionLoc = glGetUniformLocation(shaderProg, "projection");
