@@ -15,6 +15,8 @@
 #include "stb_image.h"
 
 
+using namespace std;
+
 bool firstTimePressed = true;
 double currentTimePressed, lastTimePressed;
 
@@ -111,6 +113,8 @@ void Key_Callback(GLFWwindow* window,
     }
     
 }
+
+
 
 std::vector<GLfloat> loadModel(std::string objectPath, std::vector<GLfloat> fullVertexData) {
 
@@ -975,7 +979,6 @@ int main(void)
         directionlight.setDirectionLight(shaderProgram);
         currentTimePressed = glfwGetTime();
 
-
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -984,7 +987,7 @@ int main(void)
         spotlight.direction = glm::vec3(CameraCenter.x, CameraCenter.y, CameraCenter.z - 12.0f);
         keyInput(window);
 
-        glm::vec3 cameraPos = glm::vec3(0, 0, subPos_z + 10.0f);
+        glm::vec3 cameraPos = glm::vec3(subPos_x, subPos_y + 2.f, subPos_z + 10.0f);
 
         glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + CameraCenter, WorldUp);
         glDepthMask(GL_FALSE);
@@ -1016,7 +1019,7 @@ int main(void)
 
         //SHIP1
         glm::mat4 transformation_matrix = glm::mat4(1.0f);
-        transformation_matrix = glm::translate(transformation_matrix, glm::vec3(6.0f, -3.0f, -25.0f));
+        transformation_matrix = glm::translate(transformation_matrix, glm::vec3(20.0f, -3.0f, -45.0f));
         transformation_matrix = glm::scale(transformation_matrix, glm::vec3(0.005f, 0.005f, 0.005f));
         transformation_matrix = glm::rotate(transformation_matrix, glm::radians(-90.0f), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc = glGetUniformLocation(shaderProgram, "transform");
@@ -1041,39 +1044,6 @@ int main(void)
         else if (camMode == 2)
             oCam.getOCamera(shaderProgram);
 
-        /*unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection_matrix));
-
-        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-        */
-
-
-        //unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
-        //glUniform3fv(lightPosLoc, 1, glm::value_ptr(lightPos));
-
-        //unsigned int lightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
-        //glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
-
-        ////Ambient
-        //unsigned int ambientStrLoc = glGetUniformLocation(shaderProgram, "ambientStr");
-        //glUniform1f(ambientStrLoc, ambientStr);
-
-        //unsigned int ambientColorLoc = glGetUniformLocation(shaderProgram, "ambientColor");
-        //glUniform3fv(ambientColorLoc, 1, glm::value_ptr(ambientColor));
-
-        ////Spec
-        //unsigned int cameraPosLoc = glGetUniformLocation(shaderProgram, "cameraPos");
-        //glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
-        //unsigned int specStrLoc = glGetUniformLocation(shaderProgram, "specStr");
-        //glUniform1f(specStrLoc, specStr);
-        //unsigned int specPhongLoc = glGetUniformLocation(shaderProgram, "specPhog");
-        //glUniform1f(specPhongLoc, specPhong);
-
-        //glUniform1f(glGetUniformLocation(shaderProgram, "constant"), 1.0f);
-        //glUniform1f(glGetUniformLocation(shaderProgram, "lin"), 0.1f);
-        //glUniform1f(glGetUniformLocation(shaderProgram, "quad"), 0.04f);
-
         glUseProgram(shaderProgram); // Declare in loop once
         glBindVertexArray(VAO_ship1); // Declare in loop once
         glDrawArrays(GL_TRIANGLES, 0, fullVertexDataShip1.size() / 14);
@@ -1087,8 +1057,8 @@ int main(void)
         }
 
         glm::mat4 transformation_matrix2 = glm::mat4(1.0f);
-        transformation_matrix2 = glm::translate(transformation_matrix2, glm::vec3(-4.0f, -3.0f, -40.0f));
-        transformation_matrix2 = glm::scale(transformation_matrix2, glm::vec3(0.005f, 0.005f, 0.005f));
+        transformation_matrix2 = glm::translate(transformation_matrix2, glm::vec3(-18.0f, -3.0f, -60.0f));
+        transformation_matrix2 = glm::scale(transformation_matrix2, glm::vec3(0.015f, 0.015f, 0.0015f));
         transformation_matrix2 = glm::rotate(transformation_matrix2, glm::radians(-90.0f), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc2 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc2, 1, GL_FALSE, glm::value_ptr(transformation_matrix2));
@@ -1103,8 +1073,8 @@ int main(void)
         }
 
         glm::mat4 transformation_matrix3 = glm::mat4(1.0f);
-        transformation_matrix3 = glm::translate(transformation_matrix3, glm::vec3(-4.0f, -3.0f, -80.0f));
-        transformation_matrix3 = glm::scale(transformation_matrix3, glm::vec3(0.003f, 0.003f, 0.003f));
+        transformation_matrix3 = glm::translate(transformation_matrix3, glm::vec3(-14.0f, -3.0f, -100.0f));
+        transformation_matrix3 = glm::scale(transformation_matrix3, glm::vec3(0.010f, 0.010f, 0.010f));
         transformation_matrix3 = glm::rotate(transformation_matrix3, glm::radians(-90.0f), glm::normalize(glm::vec3(1, 0, 0)));
         transformation_matrix3 = glm::rotate(transformation_matrix3, glm::radians(180.0f), glm::normalize(glm::vec3(0, 1, 0)));
         unsigned int transformationLoc3 = glGetUniformLocation(shaderProgram, "transform");
@@ -1120,8 +1090,8 @@ int main(void)
         }
 
         glm::mat4 transformation_matrix4 = glm::mat4(1.0f);
-        transformation_matrix4 = glm::translate(transformation_matrix4, glm::vec3(4.5f, -3.0f, -60.0f));
-        transformation_matrix4 = glm::scale(transformation_matrix4, glm::vec3(0.01f, 0.01f, 0.01f));
+        transformation_matrix4 = glm::translate(transformation_matrix4, glm::vec3(16.f, -3.0f, -80.0f));
+        transformation_matrix4 = glm::scale(transformation_matrix4, glm::vec3(0.03f, 0.03f, 0.03f));
         transformation_matrix4 = glm::rotate(transformation_matrix4, glm::radians(-90.0f), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc4 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc4, 1, GL_FALSE, glm::value_ptr(transformation_matrix4));
@@ -1136,8 +1106,8 @@ int main(void)
         }
 
         glm::mat4 transformation_matrix5 = glm::mat4(1.0f);
-        transformation_matrix5 = glm::translate(transformation_matrix5, glm::vec3(-6.0f, -3.0f, -120.0f));
-        transformation_matrix5 = glm::scale(transformation_matrix5, glm::vec3(0.1f, 0.1f, 0.1f));
+        transformation_matrix5 = glm::translate(transformation_matrix5, glm::vec3(-16.0f, -3.0f, -140.0f));
+        transformation_matrix5 = glm::scale(transformation_matrix5, glm::vec3(0.3f, 0.3f, 0.3f));
         transformation_matrix5 = glm::rotate(transformation_matrix5, glm::radians(0.0f), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc5 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc5, 1, GL_FALSE, glm::value_ptr(transformation_matrix5));
@@ -1152,8 +1122,8 @@ int main(void)
         }
 
         glm::mat4 transformation_matrix6 = glm::mat4(1.0f);
-        transformation_matrix6 = glm::translate(transformation_matrix6, glm::vec3(6.0f, -3.5f, -100.0f));
-        transformation_matrix6 = glm::scale(transformation_matrix6, glm::vec3(0.008f, 0.008f, 0.008f));
+        transformation_matrix6 = glm::translate(transformation_matrix6, glm::vec3(23.0f, -16.0f, -120.0f));
+        transformation_matrix6 = glm::scale(transformation_matrix6, glm::vec3(0.012f, 0.012f, 0.012f));
         transformation_matrix6 = glm::rotate(transformation_matrix6, glm::radians(-90.0f), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc6 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc6, 1, GL_FALSE, glm::value_ptr(transformation_matrix6));
@@ -1249,26 +1219,29 @@ void keyInput(GLFWwindow* window) {
     }
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-
+        cameraPos -= glm::normalize(glm::cross(CameraCenter, WorldUp)) * cameraSpeed;
         subPos_x -= 0.05f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-
+        cameraPos += glm::normalize(glm::cross(CameraCenter, WorldUp)) * cameraSpeed;
         subPos_x += 0.05f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-
         subPos_y -= 0.1f;
+
+        std::cout << "Depth: " << subPos_y << "\n";
     }
 
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 
         if (subPos_y < 0.0f)
             subPos_y += 0.1f;
-    }
 
+        std::cout << "Depth: " << subPos_y << "\n";
+    }
+    
 }
 
 void mouseInput(GLFWwindow* window, double xPos, double yPos) {
