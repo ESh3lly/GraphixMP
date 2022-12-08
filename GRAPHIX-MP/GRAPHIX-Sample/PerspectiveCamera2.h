@@ -17,7 +17,7 @@ public:
         glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA);
         glBlendEquation(GL_FUNC_SUBTRACT);*/
 
-        cameraPos = glm::vec3(0, -3.f, subPos_z - 10.0f);
+        cameraPos = glm::vec3(subPos_x, subPos_y, subPos_z - 10.0f);
         CameraCenter = glm::vec3(0.f, 0.f, -1.f);
         WorldUp = glm::vec3(0.f, 1.f, 0.f);
         viewMatrix = glm::lookAt(cameraPos, cameraPos + CameraCenter, WorldUp);
@@ -60,8 +60,12 @@ public:
         glUniformMatrix4fv(transformationLoc8, 1, GL_FALSE, glm::value_ptr(transformation_matrix8));
         glDrawArrays(GL_TRIANGLES, 0, fullVertexDataPlane.size() / 14);
 
-        glEnable(GL_BLEND);
+        /*glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA);
+        glBlendEquation(GL_FUNC_ADD);*/
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_ONE_MINUS_SRC_ALPHA);
         glBlendEquation(GL_FUNC_ADD);
     }
 };

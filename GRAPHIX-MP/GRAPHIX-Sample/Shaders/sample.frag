@@ -40,9 +40,7 @@ uniform float quad; //Quadratic var for point light
 
 vec4 spotlight(){
     vec4 pixelColor = texture(tex0, texCoord);
-	if(pixelColor.a < 0.1){
-		discard;
-	}
+	
     
     vec3 normal = normalize(normCoord);
 
@@ -87,9 +85,7 @@ vec4 spotlight(){
 //Implement separate method for direction light to feed to FragColor
 vec4 directionlight(){
     vec4 pixelColor = texture(tex0, texCoord);
-	if(pixelColor.a < 0.1){
-		discard;
-	}
+	
    vec3 normal = normalize(normCoord);
 
     vec3 lightDir = normalize(-direction);
