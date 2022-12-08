@@ -5,25 +5,25 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-class PointLight : public Light
+class SpotLight : public Light
 {
-	//Point light members
+	//Spotlight members
 public:
 	float constant = 1.0f;
 	float linear = 0.5f;
 	float quadratic = 0.1f;
-
-	PointLight(float xPos, float yPos, float zPos)
+	glm::vec3 direction;
+	SpotLight(float xPos, float yPos, float zPos)
 	{
 		lightColor = glm::vec3(1, 1, 1);
 		lightPosition = glm::vec3(xPos, yPos, zPos);
-		// Init to 0 for unlit
-		ambientStr = 0.5f;
+		direction = glm::vec3(0.0f, 0.0f, 0.0f);
+		ambientStr = 1.0f;
 		specPhog = 10.0f;
 		specStr = 5.0f;
 	}
 
-	void setPointLight(GLuint shaderProgram)
+	void setSpotLight(GLuint shaderProgram)
 	{
 		//Get Uniforms from Shader
 		unsigned int lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos");
@@ -52,6 +52,15 @@ public:
 
 		unsigned int quadLoc = glGetUniformLocation(shaderProgram, "quad");
 		glUniform1f(quadLoc, quadratic);
+
+		unsigned int spotDirLoc = glGetUniformLocation(shaderProgram, "direction2");
+		glUniform3f(spotDirLoc, direction.x, direction.y, direction.z);
+
+		unsigned int spotCutOffLoc = glGetUniformLocation(shaderProgram, "cutOff");
+		glUniform1f(spotCutOffLoc, glm::cos(glm::radians(8.5f)));
+		unsigned int spotOutCutOffLoc = glGetUniformLocation(shaderProgram, "outerCutOff");
+		glUniform1f(spotOutCutOffLoc, glm::cos(glm::radians(13.5f)));
+
 	}
 
 

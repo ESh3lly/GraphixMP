@@ -13,6 +13,11 @@ in vec3 fragPos;
 
 uniform vec3 direction;
 
+//Spotlight Vars
+uniform vec3 direction2;
+float cutOff;
+float outerCutOff;
+
 //Ambient
 uniform float ambientStr;
 uniform vec3 ambientColor;
@@ -33,7 +38,7 @@ uniform float constant; //light constant value
 uniform float lin; //Linear var for light
 uniform float quad; //Quadratic var for point light
 
-vec4 pointlight(){
+vec4 spotlight(){
     vec4 pixelColor = texture(tex0, texCoord);
 	if(pixelColor.a < 0.1){
 		discard;
@@ -57,6 +62,13 @@ vec4 pointlight(){
       specPhog
      );
      vec3 specCol = spec * specStr * lightColor;
+
+     //Spotlight Computation
+     float theta = dot(lightDir, normalize(-direction2) );
+     float epsilon = (cutOff - outerCutOff);
+     float intensity = clamp((theta-outerCutOff) / epsilon, 0.0, 1.0);
+     diffuse *= intensity;
+     specCol *= intensity;
 
      //Attenuation for point light intensity relative to distance from object
      //Compute distance from light and object
@@ -106,5 +118,5 @@ void main(){
     //FragColor = color;
    
 
-     FragColor =  directionlight() + pointlight();
+     FragColor =  directionlight() + spotlight();
 }

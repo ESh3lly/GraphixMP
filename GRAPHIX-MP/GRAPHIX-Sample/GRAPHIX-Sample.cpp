@@ -53,7 +53,7 @@ GLuint VAO_ship1, VBO_ship1, VAO_ship2, VBO_ship2, VAO_fighterShip, VBO_fighterS
 #include "PerspectiveCamera2.h"
 #include "OrthoCamera.h"
 
-#include "PointLight.h"
+#include "SpotLight.h"
 #include "DirectionLight.h"
 
 
@@ -61,7 +61,7 @@ GLuint VAO_ship1, VBO_ship1, VAO_ship2, VBO_ship2, VAO_fighterShip, VBO_fighterS
 
 
 int lightIntensity = 1;
-PointLight pointlight = PointLight(subPos_x, subPos_y, subPos_z);
+SpotLight spotlight = SpotLight(subPos_x, subPos_y, subPos_z);
 DirectionLight directionlight = DirectionLight(5.0f, 12.0f, 0.0f);
 
 void keyInput(GLFWwindow* window);
@@ -77,19 +77,19 @@ void Key_Callback(GLFWwindow* window,
     {
         if (lightIntensity == 1) {
             lightIntensity = 2;
-            pointlight.ambientStr = 0.5f;
+            spotlight.ambientStr = 3.0f;
             printf("%d", lightIntensity);
         }
 
         else if (lightIntensity == 2) {
             lightIntensity = 3;
-            pointlight.ambientStr = 2.0f;
+            spotlight.ambientStr = 7.0f;
             printf("%d", lightIntensity);
         }
 
         else if (lightIntensity == 3) {
             lightIntensity = 1;
-            pointlight.ambientStr = 4.0f;
+            spotlight.ambientStr = 10.0f;
             printf("%d", lightIntensity);
 
         }
@@ -971,7 +971,7 @@ int main(void)
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        pointlight.setPointLight(shaderProgram);
+        spotlight.setSpotLight(shaderProgram);
         directionlight.setDirectionLight(shaderProgram);
         currentTimePressed = glfwGetTime();
 
@@ -980,8 +980,8 @@ int main(void)
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        pointlight.lightPosition = glm::vec3(subPos_x, subPos_y, subPos_z - 5.0f);
-
+        spotlight.lightPosition = glm::vec3(subPos_x, subPos_y, subPos_z - 15.0f);
+        spotlight.direction = glm::vec3(CameraCenter.x, CameraCenter.y, CameraCenter.z - 12.0f);
         keyInput(window);
 
         glm::vec3 cameraPos = glm::vec3(0, 0, subPos_z + 10.0f);
@@ -1168,9 +1168,9 @@ int main(void)
         }
         
         glm::mat4 transformation_matrix7 = glm::mat4(1.0f);
-        transformation_matrix7 = glm::translate(transformation_matrix7, glm::vec3(0.0f, -3.0f, subPos_z));
+        transformation_matrix7 = glm::translate(transformation_matrix7, glm::vec3(subPos_x, subPos_y, subPos_z));
         transformation_matrix7 = glm::scale(transformation_matrix7, glm::vec3(0.0007f, 0.0007f, 0.0007f));
-        transformation_matrix7 = glm::rotate(transformation_matrix7, glm::radians(90.0f), glm::normalize(glm::vec3(1, 0, 0)));
+        transformation_matrix7 = glm::rotate(transformation_matrix7, glm::radians(270.0f), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc7 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc7, 1, GL_FALSE, glm::value_ptr(transformation_matrix7));
         glDrawArrays(GL_TRIANGLES, 0, fullVertexDataSubmarine.size() / 14);
@@ -1250,12 +1250,12 @@ void keyInput(GLFWwindow* window) {
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 
-        subPos_x -= 0.1f;
+        subPos_x -= 0.05f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 
-        subPos_x += 0.1f;
+        subPos_x += 0.05f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
