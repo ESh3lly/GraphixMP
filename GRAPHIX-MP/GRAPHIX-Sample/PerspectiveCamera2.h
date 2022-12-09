@@ -12,7 +12,7 @@ public:
     };
 
     /*perspective camera draw part*/
-    void getPCamera2(GLuint shaderProg, glm::mat4 viewMatrix, GLuint tex0Address) {
+    void getPCamera2(GLuint shaderProg, glm::mat4 viewMatrix, GLuint tex0Address, Model3D plane) {
         /*glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA);
         glBlendEquation(GL_FUNC_SUBTRACT);*/
@@ -48,7 +48,7 @@ public:
             glm::value_ptr(projection_matrix)
         );
 
-        glBindTexture(GL_TEXTURE_2D, planeTexture);
+        glBindTexture(GL_TEXTURE_2D, plane.newTexture);
         glUniform1i(tex0Address, 0);
         glBindVertexArray(VAO_plane);
 
@@ -58,7 +58,7 @@ public:
         transformation_matrix8 = glm::rotate(transformation_matrix8, glm::radians(-90.0f), glm::normalize(glm::vec3(0, 0, 1)));
         unsigned int transformationLoc8 = glGetUniformLocation(shaderProg, "transform");
         glUniformMatrix4fv(transformationLoc8, 1, GL_FALSE, glm::value_ptr(transformation_matrix8));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexDataPlane.size() / 14);
+        glDrawArrays(GL_TRIANGLES, 0, plane.fullVertexData.size() / 14);
 
         /*glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA);

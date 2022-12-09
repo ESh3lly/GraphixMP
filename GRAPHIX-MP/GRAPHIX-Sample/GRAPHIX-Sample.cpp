@@ -14,6 +14,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "SpotLight.h"
+#include "DirectionLight.h"
+
+#include "Model3D.h"
 
 using namespace std;
 
@@ -33,8 +37,8 @@ bool firstMouse = true;
 float lastX = 800.0f / 2.0;
 float lastY = 600.0F / 2.0;
 
-int camMode = 1; //1 for perspective, 2 for orthographic
-int pov = 1; //1 for 3pv, 2 for fpv
+int camMode = 1; 
+int pov = 1; 
 
 glm::vec3 cameraPos = glm::vec3(0.f, 0.f, 3.f);
 glm::vec3 CameraCenter = glm::vec3(0.f, 0.f, -1.f);
@@ -55,21 +59,9 @@ float screenHeight = 1000.0f;
 
 bool leftClick = false;
 
-std::vector<GLfloat> fullVertexDataShip1, fullVertexDataShip2, fullVertexDataFighterShip, fullVertexDataRacingBoat, fullVertexDataWhaleShark, fullVertexDataSubmarine, fullVertexDataSquid, fullVertexDataPlane;
-GLuint ship1Texture, ship2Texture, fighterShipTexture, racingBoatTexture, whaleSharkTexture, submarineTexture, squidTexture, planeTexture;
+GLuint VAO_ship1, VBO_ship1, VAO_ship2, VBO_ship2, VAO_fighterShip, VBO_fighterShip, VAO_racingBoat, VBO_racingBoat, VAO_whaleShark, VBO_whaleShark, VAO_submarine, VBO_submarine, VAO_squid, VBO_squid, VAO_plane, VBO_plane;
 
-GLuint VAO_ship1, VBO_ship1, VAO_ship2, VBO_ship2, VAO_fighterShip, VBO_fighterShip, VAO_racingBoat, VBO_racingBoat, VAO_whaleShark, VBO_whaleShark, VAO_submarine, VBO_submarine, VAO_squid, VBO_squid, VAO_plane, VBO_plane; //EBO, VBO_UV;
-
-
-
-#include "MyCamera.h"
-#include "PerspectiveCamera1.h"
-#include "PerspectiveCamera2.h"
-#include "OrthoCamera.h"
-
-#include "SpotLight.h"
-#include "DirectionLight.h"
-
+Model3D ship1, ship2, fighterShip, racingBoat, whaleShark, submarine, squid, plane;
 
 int lightIntensity = 1;
 SpotLight spotlight = SpotLight(subPos_x, subPos_y, subPos_z);
@@ -83,8 +75,6 @@ void Key_Callback(GLFWwindow* window,
     int scancode,
     int action,
     int mods) {
-
-
 
     if (key == GLFW_KEY_F && action == GLFW_PRESS)
     {
@@ -133,234 +123,17 @@ void Key_Callback(GLFWwindow* window,
 }
 
 
-
-std::vector<GLfloat> loadModel(std::string objectPath, std::vector<GLfloat> fullVertexData) {
-
-    std::string path = objectPath;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
-    std::string warning, error;
-
-    tinyobj::attrib_t attributes;
-
-    bool success = tinyobj::LoadObj(
-        &attributes,
-        &shapes,
-        &materials,
-        &warning,
-        &error,
-        path.c_str()
-    );
-
-    std::vector<GLuint> mesh_indices1;
-    for (int i = 0; i < shapes[0].mesh.indices.size(); i++) {
-        mesh_indices1.push_back(shapes[0].mesh.indices[i].vertex_index);
-    }
-
-    std::vector<glm::vec3> tangents;
-    std::vector<glm::vec3> bitangents;
-
-    for (int i = 0; i < shapes[0].mesh.indices.size(); i += 3) {
-        tinyobj::index_t vData1 = shapes[0].mesh.indices[i];
-        tinyobj::index_t vData2 = shapes[0].mesh.indices[i + 1];
-        tinyobj::index_t vData3 = shapes[0].mesh.indices[i + 2];
-
-        glm::vec3 v1 = glm::vec3(
-            attributes.vertices[vData1.vertex_index * 3],
-            attributes.vertices[vData1.vertex_index * 3 + 1],
-            attributes.vertices[vData1.vertex_index * 3 + 2]
-        );
-
-        glm::vec3 v2 = glm::vec3(
-            attributes.vertices[vData2.vertex_index * 3],
-            attributes.vertices[vData2.vertex_index * 3 + 1],
-            attributes.vertices[vData2.vertex_index * 3 + 2]
-        );
-
-        glm::vec3 v3 = glm::vec3(
-            attributes.vertices[vData3.vertex_index * 3],
-            attributes.vertices[vData3.vertex_index * 3 + 1],
-            attributes.vertices[vData3.vertex_index * 3 + 2]
-        );
-
-        glm::vec2 uv1 = glm::vec2(
-            attributes.texcoords[vData1.texcoord_index * 2],
-            attributes.texcoords[vData1.texcoord_index * 2 + 1]
-        );
-
-        glm::vec2 uv2 = glm::vec2(
-            attributes.texcoords[vData2.texcoord_index * 2],
-            attributes.texcoords[vData2.texcoord_index * 2 + 1]
-        );
-
-        glm::vec2 uv3 = glm::vec2(
-            attributes.texcoords[vData3.texcoord_index * 2],
-            attributes.texcoords[vData3.texcoord_index * 2 + 1]
-        );
-
-        glm::vec3 deltaPos1 = v2 - v1;
-        glm::vec3 deltaPos2 = v3 - v1;
-
-        glm::vec2 deltaUV1 = uv2 - uv1;
-        glm::vec2 deltaUV2 = uv3 - uv1;
-
-        float r = 1.f / ((deltaUV1.x * deltaUV2.y) - (deltaUV1.y * deltaUV2.x));
-
-        glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-        glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
-
-        tangents.push_back(tangent);
-        tangents.push_back(tangent);
-        tangents.push_back(tangent);
-
-        bitangents.push_back(bitangent);
-        bitangents.push_back(bitangent);
-        bitangents.push_back(bitangent);
-
-    }
-
-    for (int i = 0; i < shapes[0].mesh.indices.size(); i++) {
-        tinyobj::index_t vData = shapes[0].mesh.indices[i];
-
-        int vertexIndex = vData.vertex_index * 3;
-        int uvIndex = vData.texcoord_index * 2;
-        int normalIndex = vData.normal_index * 3;
-
-        // X
-        fullVertexData.push_back(
-            attributes.vertices[vertexIndex]
-        );
-
-        // Y
-        fullVertexData.push_back(
-            attributes.vertices[vertexIndex + 1]
-        );
-
-        // Z
-        fullVertexData.push_back(
-            attributes.vertices[vertexIndex + 2]
-        );
-
-        // X
-        fullVertexData.push_back(
-            attributes.normals[normalIndex]
-        );
-
-        // Y
-        fullVertexData.push_back(
-            attributes.normals[normalIndex + 1]
-        );
-
-        // Z
-        fullVertexData.push_back(
-            attributes.normals[normalIndex + 2]
-        );
-
-        // U
-        fullVertexData.push_back(
-            attributes.texcoords[uvIndex]
-        );
-
-        // V
-        fullVertexData.push_back(
-            attributes.texcoords[uvIndex + 1]
-        );
-
-        fullVertexData.push_back(
-            tangents[i].x
-        );
-
-        fullVertexData.push_back(
-            tangents[i].y
-        );
-
-        fullVertexData.push_back(
-            tangents[i].z
-        );
-
-        fullVertexData.push_back(
-            bitangents[i].x
-        );
-
-        fullVertexData.push_back(
-            bitangents[i].y
-        );
-
-        fullVertexData.push_back(
-            bitangents[i].z
-        );
-
-    }
-
-    return fullVertexData;
-}
-
-
-GLuint loadTexturesRGB(const char* texturePath, GLuint newTexture) {
-
-    int img_width, img_height, color_channels;
-
-    unsigned char* tex_bytes = stbi_load(texturePath, &img_width, &img_height, &color_channels, 0);
-
-    glGenTextures(1, &newTexture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, newTexture);
-
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGB, // GL_RGB = jpegs /pngs w/o a GL_RGBA = png / images w/ a
-        img_width,
-        img_height,
-        0,
-        GL_RGB,
-        GL_UNSIGNED_BYTE,
-        tex_bytes
-    );
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(tex_bytes);
-
-    glEnable(GL_DEPTH_TEST);
-
-    return newTexture;
-}
-
-GLuint loadTexturesRGBA(const char* texturePath, GLuint newTexture) {
-
-    int img_width, img_height, color_channels;
-
-    unsigned char* tex_bytes = stbi_load(texturePath, &img_width, &img_height, &color_channels, 0);
-
-    glGenTextures(1, &newTexture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, newTexture);
-
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA, // GL_RGB = jpegs /pngs w/o a GL_RGBA = png / images w/ a
-        img_width,
-        img_height,
-        0,
-        GL_RGBA,
-        GL_UNSIGNED_BYTE,
-        tex_bytes
-    );
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(tex_bytes);
-
-    glEnable(GL_DEPTH_TEST);
-
-    return newTexture;
-}
 void yawpitch() {
     camCen_x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     camCen_y = sin(glm::radians(pitch));
     camCen_z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     CameraCenter = glm::normalize(glm::vec3(camCen_x, camCen_y, camCen_z));
 }
+
+#include "MyCamera.h"
+#include "PerspectiveCamera1.h"
+#include "PerspectiveCamera2.h"
+#include "OrthoCamera.h"
 
 int main(void)
 {
@@ -539,8 +312,8 @@ int main(void)
 
     /* Ship 1 */
 
-    fullVertexDataShip1 = loadModel("3D/Durham Boat V1/ship1.obj", fullVertexDataShip1);
-    ship1Texture = loadTexturesRGB("3D/Textures/wood.jpg", ship1Texture);
+    ship1.loadModel("3D/Durham Boat V1/ship1.obj");
+    ship1.loadTexturesRGB("3D/Textures/wood.jpg");
 
     glGenVertexArrays(1, &VAO_ship1);
     glGenBuffers(1, &VBO_ship1);
@@ -548,7 +321,7 @@ int main(void)
     glBindVertexArray(VAO_ship1);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_ship1);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* fullVertexDataShip1.size(), fullVertexDataShip1.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* ship1.fullVertexData.size(), ship1.fullVertexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GL_FLOAT), (void*)0);
 
@@ -599,8 +372,8 @@ int main(void)
 
     /* Ship 2 */
 
-    fullVertexDataShip2 = loadModel("3D/Fireboat V1/ship2.obj", fullVertexDataShip2);
-    ship2Texture = loadTexturesRGB("3D/Textures/futuristic.jpg", ship2Texture);
+    ship2.loadModel("3D/Fireboat V1/ship2.obj");
+    ship2.loadTexturesRGB("3D/Textures/futuristic.jpg");
 
     glGenVertexArrays(1, &VAO_ship2);
     glGenBuffers(1, &VBO_ship2);
@@ -608,7 +381,7 @@ int main(void)
     glBindVertexArray(VAO_ship2);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_ship2);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT) * fullVertexDataShip2.size(), fullVertexDataShip2.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT) * ship2.fullVertexData.size(), ship2.fullVertexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GL_FLOAT), (void*)0);
 
@@ -652,8 +425,8 @@ int main(void)
 
     /* fighterShip */
 
-    fullVertexDataFighterShip = loadModel("3D/FighterShip/fightership.obj", fullVertexDataFighterShip);
-    fighterShipTexture = loadTexturesRGB("3D/FighterShip/Fighter_Ship_body_diffuse.jpg", fighterShipTexture);
+    fighterShip.loadModel("3D/FighterShip/fightership.obj");
+    fighterShip.loadTexturesRGB("3D/FighterShip/Fighter_Ship_body_diffuse.jpg");
 
     glGenVertexArrays(1, &VAO_fighterShip);
     glGenBuffers(1, &VBO_fighterShip);
@@ -661,7 +434,7 @@ int main(void)
     glBindVertexArray(VAO_fighterShip);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_fighterShip);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* fullVertexDataFighterShip.size(), fullVertexDataFighterShip.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* fighterShip.fullVertexData.size(), fighterShip.fullVertexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GL_FLOAT), (void*)0);
 
@@ -706,8 +479,8 @@ int main(void)
 
     /* Racing Boat */
 
-    fullVertexDataRacingBoat = loadModel("3D/RacingBoat/racingboat.obj", fullVertexDataRacingBoat);
-    racingBoatTexture = loadTexturesRGB("3D/RacingBoat/racingBoatTexture.jpg", racingBoatTexture);
+    racingBoat.loadModel("3D/RacingBoat/racingboat.obj");
+    racingBoat.loadTexturesRGB("3D/RacingBoat/racingBoatTexture.jpg");
 
     glGenVertexArrays(1, &VAO_racingBoat);
     glGenBuffers(1, &VBO_racingBoat);
@@ -715,7 +488,7 @@ int main(void)
     glBindVertexArray(VAO_racingBoat);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_racingBoat);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* fullVertexDataRacingBoat.size(), fullVertexDataRacingBoat.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* racingBoat.fullVertexData.size(), racingBoat.fullVertexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GL_FLOAT), (void*)0);
 
@@ -759,8 +532,8 @@ int main(void)
 
     /* Whale Shark */
 
-    fullVertexDataWhaleShark = loadModel("3D/whaleshark.obj", fullVertexDataWhaleShark);
-    whaleSharkTexture = loadTexturesRGB("3D/Textures/rust.jpg", whaleSharkTexture);
+    whaleShark.loadModel("3D/whaleshark.obj");
+    whaleShark.loadTexturesRGB("3D/Textures/rust.jpg");
 
     glGenVertexArrays(1, &VAO_whaleShark);
     glGenBuffers(1, &VBO_whaleShark);
@@ -768,7 +541,7 @@ int main(void)
     glBindVertexArray(VAO_whaleShark);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_whaleShark);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* fullVertexDataWhaleShark.size(), fullVertexDataWhaleShark.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* whaleShark.fullVertexData.size(), whaleShark.fullVertexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GL_FLOAT), (void*)0);
 
@@ -812,8 +585,8 @@ int main(void)
 
     /* Submarine */
 
-    fullVertexDataSubmarine = loadModel("3D/submarine.obj", fullVertexDataSubmarine);
-    submarineTexture = loadTexturesRGB("3D/Textures/camo.jpg", submarineTexture);
+    submarine.loadModel("3D/submarine.obj");
+    submarine.loadTexturesRGB("3D/Textures/camo.jpg");
 
     glGenVertexArrays(1, &VAO_submarine);
     glGenBuffers(1, &VBO_submarine);
@@ -821,7 +594,7 @@ int main(void)
     glBindVertexArray(VAO_submarine);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_submarine);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* fullVertexDataSubmarine.size(), fullVertexDataSubmarine.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* submarine.fullVertexData.size(), submarine.fullVertexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GL_FLOAT), (void*)0);
 
@@ -865,8 +638,8 @@ int main(void)
 
     /* Squid */
 
-    fullVertexDataSquid = loadModel("3D/squid.obj", fullVertexDataSquid);
-    squidTexture = loadTexturesRGB("3D/Textures/floral.jpg", squidTexture);
+    squid.loadModel("3D/squid.obj");
+    squid.loadTexturesRGB("3D/Textures/floral.jpg");
 
     glGenVertexArrays(1, &VAO_squid);
     glGenBuffers(1, &VBO_squid);
@@ -874,7 +647,7 @@ int main(void)
     glBindVertexArray(VAO_squid);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_squid);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* fullVertexDataSquid.size(), fullVertexDataSquid.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* squid.fullVertexData.size(), squid.fullVertexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GL_FLOAT), (void*)0);
 
@@ -918,8 +691,8 @@ int main(void)
 
     /* Plane */
 
-    fullVertexDataPlane = loadModel("3D/plane.obj", fullVertexDataPlane);
-    planeTexture = loadTexturesRGBA("3D/Textures/gradient.png", planeTexture);
+    plane.loadModel("3D/plane.obj");
+    plane.loadTexturesRGBA("3D/Textures/gradient.png");
 
     glGenVertexArrays(1, &VAO_plane);
     glGenBuffers(1, &VBO_plane);
@@ -927,7 +700,7 @@ int main(void)
     glBindVertexArray(VAO_plane);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_plane);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* fullVertexDataPlane.size(), fullVertexDataPlane.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT)* plane.fullVertexData.size(), plane.fullVertexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GL_FLOAT), (void*)0);
 
@@ -1055,7 +828,7 @@ int main(void)
         glActiveTexture(GL_TEXTURE0);
         GLuint tex0Address = glGetUniformLocation(shaderProgram, "tex0");
         if (pov == 1) {
-            glBindTexture(GL_TEXTURE_2D, ship1Texture);
+            glBindTexture(GL_TEXTURE_2D, ship1.newTexture);
             glUniform1i(tex0Address, 0);
         }
 
@@ -1063,20 +836,20 @@ int main(void)
             if (pov == 1)
                 FPVCam.getPCamera(shaderProgram, viewMatrix);
             else if (pov == 2)
-                TPVCam.getPCamera2(shaderProgram, viewMatrix, tex0Address);
+                TPVCam.getPCamera2(shaderProgram, viewMatrix, tex0Address , plane);
         }
         else if (camMode == 2)
             oCam.getOCamera(shaderProgram);
 
         glUseProgram(shaderProgram); // Declare in loop once
         glBindVertexArray(VAO_ship1); // Declare in loop once
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexDataShip1.size() / 14);
+        glDrawArrays(GL_TRIANGLES, 0, ship1.fullVertexData.size() / 14);
 
         //SHIP2
         glBindVertexArray(VAO_ship2);
 
         if ((pov == 1)||(camMode==2)) {
-            glBindTexture(GL_TEXTURE_2D, ship2Texture);
+            glBindTexture(GL_TEXTURE_2D, ship2.newTexture);
             glUniform1i(tex0Address, 0);
         }
 
@@ -1086,13 +859,13 @@ int main(void)
         transformation_matrix2 = glm::rotate(transformation_matrix2, glm::radians(-90.0f), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc2 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc2, 1, GL_FALSE, glm::value_ptr(transformation_matrix2));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexDataShip2.size() / 14);
+        glDrawArrays(GL_TRIANGLES, 0, ship2.fullVertexData.size() / 14);
 
         //FIGHTERSHIP
         glBindVertexArray(VAO_fighterShip);
 
         if ((pov == 1) || (camMode == 2)) {
-            glBindTexture(GL_TEXTURE_2D, fighterShipTexture);
+            glBindTexture(GL_TEXTURE_2D, fighterShip.newTexture);
             glUniform1i(tex0Address, 0);
         }
 
@@ -1103,13 +876,13 @@ int main(void)
         transformation_matrix3 = glm::rotate(transformation_matrix3, glm::radians(180.0f), glm::normalize(glm::vec3(0, 1, 0)));
         unsigned int transformationLoc3 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc3, 1, GL_FALSE, glm::value_ptr(transformation_matrix3));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexDataFighterShip.size() / 14);
+        glDrawArrays(GL_TRIANGLES, 0, fighterShip.fullVertexData.size() / 14);
 
         //RACINGBOAT
         glBindVertexArray(VAO_racingBoat);
 
         if ((pov == 1) || (camMode == 2)) {
-            glBindTexture(GL_TEXTURE_2D, racingBoatTexture);
+            glBindTexture(GL_TEXTURE_2D, racingBoat.newTexture);
             glUniform1i(tex0Address, 0);
         }
 
@@ -1119,13 +892,13 @@ int main(void)
         transformation_matrix4 = glm::rotate(transformation_matrix4, glm::radians(-90.0f), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc4 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc4, 1, GL_FALSE, glm::value_ptr(transformation_matrix4));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexDataRacingBoat.size() / 14);
+        glDrawArrays(GL_TRIANGLES, 0, racingBoat.fullVertexData.size() / 14);
 
         //SQUID
         glBindVertexArray(VAO_squid);
 
         if ((pov == 1) || (camMode == 2)) {
-            glBindTexture(GL_TEXTURE_2D, squidTexture);
+            glBindTexture(GL_TEXTURE_2D, squid.newTexture);
             glUniform1i(tex0Address, 0);
         }
 
@@ -1135,13 +908,13 @@ int main(void)
         transformation_matrix5 = glm::rotate(transformation_matrix5, glm::radians(0.0f), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc5 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc5, 1, GL_FALSE, glm::value_ptr(transformation_matrix5));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexDataSquid.size() / 14);
+        glDrawArrays(GL_TRIANGLES, 0, squid.fullVertexData.size() / 14);
 
         //WHALESHARK
         glBindVertexArray(VAO_whaleShark);
 
         if ((pov == 1) || (camMode == 2)) {
-            glBindTexture(GL_TEXTURE_2D, whaleSharkTexture);
+            glBindTexture(GL_TEXTURE_2D, whaleShark.newTexture);
             glUniform1i(tex0Address, 0);
         }
 
@@ -1151,13 +924,13 @@ int main(void)
         transformation_matrix6 = glm::rotate(transformation_matrix6, glm::radians(-90.0f), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc6 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc6, 1, GL_FALSE, glm::value_ptr(transformation_matrix6));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexDataWhaleShark.size() / 14);
+        glDrawArrays(GL_TRIANGLES, 0, whaleShark.fullVertexData.size() / 14);
 
         //SUBMARINE
         glBindVertexArray(VAO_submarine);
 
         if ((pov == 1) || (camMode == 2)) {
-            glBindTexture(GL_TEXTURE_2D, submarineTexture);
+            glBindTexture(GL_TEXTURE_2D, submarine.newTexture);
             glUniform1i(tex0Address, 0);
         }
         
@@ -1167,7 +940,7 @@ int main(void)
         transformation_matrix7 = glm::rotate(transformation_matrix7, glm::radians(270.0f), glm::normalize(glm::vec3(1, 0, 0)));
         unsigned int transformationLoc7 = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformationLoc7, 1, GL_FALSE, glm::value_ptr(transformation_matrix7));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexDataSubmarine.size() / 14);
+        glDrawArrays(GL_TRIANGLES, 0, submarine.fullVertexData.size() / 14);
 
         //PLANE
 
@@ -1183,10 +956,7 @@ int main(void)
         glUniformMatrix4fv(transformationLoc8, 1, GL_FALSE, glm::value_ptr(transformation_matrix8));
         glDrawArrays(GL_TRIANGLES, 0, fullVertexDataPlane.size() / 14);*/
 
-        /* Swap front and back buffers */
         glfwSwapBuffers(window);
-
-        /* Poll for and process events */
         glfwPollEvents();
     }
 
@@ -1213,7 +983,6 @@ int main(void)
 
     glDeleteVertexArrays(1, &VAO_plane);
     glDeleteBuffers(1, &VBO_plane);
-    //glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;
