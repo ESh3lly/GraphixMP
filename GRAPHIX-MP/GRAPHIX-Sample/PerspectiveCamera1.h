@@ -19,33 +19,12 @@ public:
         glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
 
         unsigned int viewLoc = glGetUniformLocation(shaderProg, "view");
-        glUniformMatrix4fv(
-            viewLoc,  //address of transform variable
-            1,  //matrices to assign
-            GL_FALSE,   //Transpose?
-            glm::value_ptr(viewMatrix)
-        );
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
-        glm::mat4 projection_matrix = glm::perspective(
-            glm::radians(60.0f),
-            height / width,
-            0.1f,
-            100.f
-        );
+        glm::mat4 projection_matrix = glm::perspective(glm::radians(60.0f), height / width, 0.1f, 100.f);
 
         unsigned int projectionLoc = glGetUniformLocation(shaderProg, "projection");
-        glUniformMatrix4fv(
-            projectionLoc,  //address of transform variable
-            1,  //matrices to assign
-            GL_FALSE,   //Transpose?
-            glm::value_ptr(projection_matrix)
-        );
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection_matrix));
 
-
-    }
-
-    void loadTextures(GLuint currTexture, GLuint texAdd) {
-        glBindTexture(GL_TEXTURE_2D, currTexture);
-        glUniform1i(texAdd, 0);
     }
 };

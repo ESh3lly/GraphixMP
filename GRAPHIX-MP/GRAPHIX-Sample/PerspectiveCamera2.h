@@ -13,9 +13,6 @@ public:
 
     /*perspective camera draw part*/
     void getPCamera2(GLuint shaderProg, glm::mat4 viewMatrix, GLuint tex0Address, Model3D plane) {
-        /*glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA);
-        glBlendEquation(GL_FUNC_SUBTRACT);*/
 
         cameraPos = glm::vec3(subPos_x, subPos_y, subPos_z - 10.0f);
         CameraCenter = glm::vec3(0.f, 0.f, -1.f);
@@ -26,27 +23,12 @@ public:
         glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
 
         unsigned int viewLoc = glGetUniformLocation(shaderProg, "view");
-        glUniformMatrix4fv(
-            viewLoc,  //address of transform variable
-            1,  //matrices to assign
-            GL_FALSE,   //Transpose?
-            glm::value_ptr(viewMatrix)
-        );
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
-        glm::mat4 projection_matrix = glm::perspective(
-            glm::radians(100.0f),
-            height / width,
-            0.1f,
-            200.f
-        );
+        glm::mat4 projection_matrix = glm::perspective(glm::radians(100.0f), height / width, 0.1f, 200.f);
 
         unsigned int projectionLoc = glGetUniformLocation(shaderProg, "projection");
-        glUniformMatrix4fv(
-            projectionLoc,  //address of transform variable
-            1,  //matrices to assign
-            GL_FALSE,   //Transpose?
-            glm::value_ptr(projection_matrix)
-        );
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection_matrix));
 
         glBindTexture(GL_TEXTURE_2D, plane.newTexture);
         glUniform1i(tex0Address, 0);

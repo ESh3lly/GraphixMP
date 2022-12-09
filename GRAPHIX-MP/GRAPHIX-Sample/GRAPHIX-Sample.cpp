@@ -70,6 +70,8 @@ DirectionLight directionlight = DirectionLight(5.0f, 12.0f, 0.0f);
 void keyInput(GLFWwindow* window);
 void mouseInput(GLFWwindow* window, double xPos, double yPos);
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+
+/*to read buttons that are used for toggling(1 press only)*/
 void Key_Callback(GLFWwindow* window,
     int key,
     int scancode,
@@ -122,7 +124,7 @@ void Key_Callback(GLFWwindow* window,
     
 }
 
-
+ /*updates the CameraCenter vector with yaw and pitch to pan cameras*/
 void yawpitch() {
     camCen_x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     camCen_y = sin(glm::radians(pitch));
@@ -942,20 +944,6 @@ int main(void)
         glUniformMatrix4fv(transformationLoc7, 1, GL_FALSE, glm::value_ptr(transformation_matrix7));
         glDrawArrays(GL_TRIANGLES, 0, submarine.fullVertexData.size() / 14);
 
-        //PLANE
-
-        /*glBindTexture(GL_TEXTURE_2D, planeTexture);
-        glUniform1i(tex0Address, 0);
-        glBindVertexArray(VAO_plane);
-
-        glm::mat4 transformation_matrix8 = glm::mat4(1.0f);
-        transformation_matrix8 = glm::translate(transformation_matrix8, glm::vec3(0.0f, -3.0f, -10.f));
-        transformation_matrix8 = glm::scale(transformation_matrix8, glm::vec3(1.f, 1.f, 1.f));
-        transformation_matrix8 = glm::rotate(transformation_matrix8, glm::radians(-90.0f), glm::normalize(glm::vec3(0, 0, 1)));
-        unsigned int transformationLoc8 = glGetUniformLocation(shaderProgram, "transform");
-        glUniformMatrix4fv(transformationLoc8, 1, GL_FALSE, glm::value_ptr(transformation_matrix8));
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexDataPlane.size() / 14);*/
-
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -988,7 +976,7 @@ int main(void)
     return 0;
 }
 
-
+/*to read buttons that should work when pressed simultaneously*/
 void keyInput(GLFWwindow* window) {
 
     float cameraSpeed = 2.5 * deltaTime;
@@ -998,15 +986,11 @@ void keyInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && (camMode != 2)) {
         cameraPos += cameraSpeed * CameraCenter;
         subPos_z -= 0.1f;
-        if (pov == 2)
-            planePos_z -= 0.1f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && (camMode != 2)) {
         cameraPos -= cameraSpeed * CameraCenter;
         subPos_z += 0.1f;
-        if (pov == 2)
-            planePos_z += 0.1f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && (camMode != 2)) {
@@ -1075,9 +1059,9 @@ void keyInput(GLFWwindow* window) {
         yawpitch();
     }
 
-
 }
 
+/*to read xand y offsets of mouse for panning the camera*/
 void mouseInput(GLFWwindow* window, double xPos, double yPos) {
 
     if ((camMode == 1)&&(pov==1)) {
@@ -1103,12 +1087,8 @@ void mouseInput(GLFWwindow* window, double xPos, double yPos) {
             pitch = 89.0f;
         if (pitch < -89.0f)
             pitch = -89.0f;
-
-        glm::vec3 front = glm::vec3(0.f, 0.f, 0.f);
-        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        front.y = sin(glm::radians(pitch));
-        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        CameraCenter = glm::normalize(front);
+        
+        yawpitch();
     }
 
     if ((camMode == 2)&&(leftClick == true)) {
@@ -1143,15 +1123,12 @@ void mouseInput(GLFWwindow* window, double xPos, double yPos) {
         if (pitch < -89.0f)
             pitch = -89.0f;
 
-        glm::vec3 front = glm::vec3(0.f, 0.f, 0.f);
-        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        front.y = sin(glm::radians(pitch));
-        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        CameraCenter = glm::normalize(front);
-      
+        yawpitch();
+            
     }
 }
 
+/*to read mouse clicks for drag feature*/
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         leftClick = true;

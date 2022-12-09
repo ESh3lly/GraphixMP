@@ -26,8 +26,7 @@ public:
 	void getOCamera(GLuint shaderProg) {
 		glDisable(GL_BLEND);
 
-		/*float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;*/
+		
 		float ccx = cos(glm::radians(orthoYaw)) * cos(glm::radians(orthoPitch));
 		float ccy = sin(glm::radians(orthoPitch));
 		float ccz = sin(glm::radians(orthoYaw)) * cos(glm::radians(orthoPitch));
@@ -44,22 +43,11 @@ public:
 		glUniform3fv(cameraPosLoc, 1, glm::value_ptr(OrthoCamPos));
 
 		unsigned int viewLoc = glGetUniformLocation(shaderProg, "view");
-		glUniformMatrix4fv(
-			viewLoc,  //address of transform variable
-			1,  //matrices to assign
-			GL_FALSE,   //Transpose?
-			glm::value_ptr(view_matrix)
-		);
+		glUniformMatrix4fv(viewLoc,	1,	GL_FALSE, glm::value_ptr(view_matrix));
 
 		unsigned int projectionLoc = glGetUniformLocation(shaderProg, "projection");
-		glUniformMatrix4fv(
-			projectionLoc,  //address of transform variable
-			1,  //matrices to assign
-			GL_FALSE,   //Transpose?
-			glm::value_ptr(projection_matrix)
-		);
-
-		
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection_matrix));
+			
 	}
 
 };
