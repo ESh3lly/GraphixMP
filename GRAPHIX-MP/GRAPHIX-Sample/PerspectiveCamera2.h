@@ -53,16 +53,13 @@ public:
         glBindVertexArray(VAO_plane);
 
         glm::mat4 transformation_matrix8 = glm::mat4(1.0f);
-        transformation_matrix8 = glm::translate(transformation_matrix8, glm::vec3(0.0f, -3.0f, subPos_z - planePos_z));
+        transformation_matrix8 = glm::translate(transformation_matrix8, glm::vec3(subPos_x, subPos_y-3.0f, subPos_z - planePos_z));
         transformation_matrix8 = glm::scale(transformation_matrix8, glm::vec3(1.f, 1.f, 1.f));
         transformation_matrix8 = glm::rotate(transformation_matrix8, glm::radians(-90.0f), glm::normalize(glm::vec3(0, 0, 1)));
         unsigned int transformationLoc8 = glGetUniformLocation(shaderProg, "transform");
         glUniformMatrix4fv(transformationLoc8, 1, GL_FALSE, glm::value_ptr(transformation_matrix8));
         glDrawArrays(GL_TRIANGLES, 0, plane.fullVertexData.size() / 14);
 
-        /*glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA);
-        glBlendEquation(GL_FUNC_ADD);*/
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_ONE_MINUS_SRC_ALPHA);

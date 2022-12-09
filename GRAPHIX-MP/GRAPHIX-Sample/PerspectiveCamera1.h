@@ -41,9 +41,6 @@ public:
             glm::value_ptr(projection_matrix)
         );
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_DST_COLOR);
-        glBlendEquation(GL_FUNC_ADD);
 
     }
 
