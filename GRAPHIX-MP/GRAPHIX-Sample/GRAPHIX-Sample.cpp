@@ -1020,28 +1020,28 @@ void keyInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && (camMode == 2)) {
         orthoPitch += 1.f;
         pitch += 1.f;
-        if (orthoPitch > 90.0f)
-            orthoPitch = 90.0f;
-        if (orthoPitch < -90.0f)
-            orthoPitch = -90.0f;
-        if (pitch > 90.0f)
-            pitch = 90.0f;
-        if (pitch < -90.0f)
-            pitch = -90.0f;
+        if (orthoPitch > 89.0f)
+            orthoPitch = 89.0f;
+        if (orthoPitch < -89.0f)
+            orthoPitch = -89.0f;
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
         yawpitch();
     }
 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && (camMode == 2)) {
         orthoPitch -= 1.f;
         pitch -= 1.f;
-        if (orthoPitch > 90.0f)
-            orthoPitch = 90.0f;
-        if (orthoPitch < -90.0f)
-            orthoPitch = -90.0f;
-        if (pitch > 90.0f)
-            pitch = 90.0f;
-        if (pitch < -90.0f)
-            pitch = -90.0f;
+        if (orthoPitch > 89.0f)
+            orthoPitch = 89.0f;
+        if (orthoPitch < -89.0f)
+            orthoPitch = -89.0f;
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
         yawpitch();
     }
 
