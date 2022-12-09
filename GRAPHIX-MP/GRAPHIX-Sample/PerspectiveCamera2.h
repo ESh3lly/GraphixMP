@@ -34,6 +34,7 @@ public:
         glUniform1i(tex0Address, 0);
         glBindVertexArray(VAO_plane);
 
+        /*render plane for sonar blending*/
         glm::mat4 transformation_matrix8 = glm::mat4(1.0f);
         transformation_matrix8 = glm::translate(transformation_matrix8, glm::vec3(subPos_x, subPos_y-3.0f, subPos_z - planePos_z));
         transformation_matrix8 = glm::scale(transformation_matrix8, glm::vec3(1.f, 1.f, 1.f));
