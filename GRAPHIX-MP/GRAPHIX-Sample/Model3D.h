@@ -16,7 +16,7 @@ public:
 
 	}
 
-
+    /* Loads the Model's fullVectorData */
     void loadModel(std::string objectPath) {
 
         std::string path = objectPath;
@@ -177,7 +177,7 @@ public:
 
     }
 
-
+    /* Loads Textures to the Model that has only RGB*/
     void loadTexturesRGB(const char* texturePath) {
 
         int img_width, img_height, color_channels;
@@ -207,6 +207,8 @@ public:
 
     }
 
+
+    /* Loads Textures to the Model that has only RGBA */
     void loadTexturesRGBA(const char* texturePath) {
 
         int img_width, img_height, color_channels;
