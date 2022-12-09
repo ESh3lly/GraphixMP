@@ -53,6 +53,8 @@ float planePos_z = -15.f;
 float screenWidth = 1000.0f;
 float screenHeight = 1000.0f;
 
+bool leftClick = false;
+
 std::vector<GLfloat> fullVertexDataShip1, fullVertexDataShip2, fullVertexDataFighterShip, fullVertexDataRacingBoat, fullVertexDataWhaleShark, fullVertexDataSubmarine, fullVertexDataSquid, fullVertexDataPlane;
 GLuint ship1Texture, ship2Texture, fighterShipTexture, racingBoatTexture, whaleSharkTexture, submarineTexture, squidTexture, planeTexture;
 
@@ -75,11 +77,13 @@ DirectionLight directionlight = DirectionLight(5.0f, 12.0f, 0.0f);
 
 void keyInput(GLFWwindow* window);
 void mouseInput(GLFWwindow* window, double xPos, double yPos);
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void Key_Callback(GLFWwindow* window,
     int key,
     int scancode,
     int action,
     int mods) {
+
 
 
     if (key == GLFW_KEY_F && action == GLFW_PRESS)
@@ -380,6 +384,7 @@ int main(void)
     glViewport(0, 0, screenWidth, screenHeight);
 
     glfwSetCursorPosCallback(window, mouseInput);
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
     // Remove This if you want mouse back when application is running
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -1337,7 +1342,7 @@ void mouseInput(GLFWwindow* window, double xPos, double yPos) {
         CameraCenter = glm::normalize(front);
     }
 
-    if (camMode == 2) {
+    if ((camMode == 2)&&(leftClick == true)) {
         if (firstMouse) {
             lastX = xPos;
             lastY = yPos;
@@ -1375,5 +1380,14 @@ void mouseInput(GLFWwindow* window, double xPos, double yPos) {
         front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
         CameraCenter = glm::normalize(front);
       
+    }
+}
+
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        leftClick = true;
+    }
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+        leftClick = false;
     }
 }

@@ -153,7 +153,6 @@
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="glut.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
